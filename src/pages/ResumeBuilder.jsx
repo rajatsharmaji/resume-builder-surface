@@ -10,7 +10,6 @@ import {
   FiCode,
   FiAward,
   FiFileText,
-  FiDownload,
 } from "react-icons/fi";
 import ContextMenu from "../components/ContextMenu";
 import useResume from "../hooks/useResume";
@@ -88,7 +87,6 @@ const ResumeBuilder = () => {
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-700">
             <FiEdit className="w-5 h-5" /> Resume Builder
           </h2>
-
           <div className="grid grid-cols-2 gap-2">
             {sectionTypes.map(({ id, label, icon, color }) => (
               <button
@@ -105,7 +103,6 @@ const ResumeBuilder = () => {
             ))}
           </div>
         </div>
-
         <SectionList
           sections={sections}
           moveSection={moveSection}
@@ -121,7 +118,6 @@ const ResumeBuilder = () => {
           </h2>
           <DownloadButton contentRef={resumeRef} />
         </div>
-
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 relative">
           {contextMenu && (
             <ContextMenu
@@ -131,7 +127,6 @@ const ResumeBuilder = () => {
               onRemoveSection={handleRemoveSection}
             />
           )}
-
           <div ref={resumeRef} className="space-y-6">
             {sections.length > 0 ? (
               sections.map((section, index) => (
