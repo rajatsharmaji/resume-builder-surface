@@ -34,6 +34,23 @@ const ResumeProvider = ({ children }) => {
     });
   };
 
+  const moveSection = (draggedId, targetIndex) => {
+    // Find the index of the dragged section
+    const draggedIndex = sections.findIndex((s) => s.id === draggedId);
+
+    // Create a new array to ensure immutability
+    const updatedSections = [...sections];
+
+    // Remove the dragged section from its current position
+    const [draggedSection] = updatedSections.splice(draggedIndex, 1);
+
+    // Insert the dragged section at the target position
+    updatedSections.splice(targetIndex, 0, draggedSection);
+
+    // Update the state with the new array
+    setSections(updatedSections);
+  };
+
   return (
     <ResumeContext.Provider
       value={{
@@ -42,6 +59,7 @@ const ResumeProvider = ({ children }) => {
         addSection,
         updateSectionContent,
         removeSection,
+        moveSection,
       }}
     >
       {children}

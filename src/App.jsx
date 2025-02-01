@@ -1,5 +1,5 @@
-import ResumeProvider from "./providers/ResumeProvider";
-import ResumeBuilder from "./pages/ResumeBuilder";
+import ResumeProvider from "/src/providers/ResumeProvider";
+import ResumeBuilder from "/src/pages/ResumeBuilder";
 
 function App() {
   return (
