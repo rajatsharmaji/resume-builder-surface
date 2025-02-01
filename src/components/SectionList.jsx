@@ -1,15 +1,33 @@
 /* eslint-disable react/prop-types */
-// src/components/SectionList.jsx
 import { useState } from "react";
-import { FaTrash } from "react-icons/fa"; // Import trash icon from react-icons";
+import {
+  FiTrash2,
+  FiChevronUp,
+  FiChevronDown,
+  FiMove,
+  FiLayout,
+  FiUser,
+  FiBriefcase,
+  FiBook,
+  FiCode,
+  FiFileText,
+  FiAward,
+} from "react-icons/fi";
+
+const sectionIcons = {
+  header: <FiLayout className="w-4 h-4" />,
+  about: <FiUser className="w-4 h-4" />,
+  experience: <FiBriefcase className="w-4 h-4" />,
+  education: <FiBook className="w-4 h-4" />,
+  skills: <FiCode className="w-4 h-4" />,
+  projects: <FiFileText className="w-4 h-4" />,
+  certifications: <FiAward className="w-4 h-4" />,
+};
 
 const SectionList = ({ sections, moveSection, removeSection }) => {
   const [draggedIndex, setDraggedIndex] = useState(null);
 
-  const handleDragStart = (index) => {
-    setDraggedIndex(index);
-  };
-
+  const handleDragStart = (index) => setDraggedIndex(index);
   const handleDrop = (targetIndex) => {
     if (draggedIndex !== null) {
       moveSection(sections[draggedIndex].id, targetIndex);
@@ -17,22 +35,18 @@ const SectionList = ({ sections, moveSection, removeSection }) => {
     }
   };
 
-  const moveUp = (index) => {
-    if (index > 0) {
-      moveSection(sections[index].id, index - 1);
-    }
-  };
-
-  const moveDown = (index) => {
-    if (index < sections.length - 1) {
-      moveSection(sections[index].id, index + 1);
-    }
-  };
+  const moveUp = (index) =>
+    index > 0 && moveSection(sections[index].id, index - 1);
+  const moveDown = (index) =>
+    index < sections.length - 1 && moveSection(sections[index].id, index + 1);
 
   return (
-    <div className="mt-8">
-      <h3 className="text-lg font-bold mb-2">Layer Section</h3>
-      <div className="bg-white shadow-md p-4 rounded">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+      <h3 className="text-sm font-semibold mb-3 text-gray-600 flex items-center gap-2">
+        <FiMove className="w-4 h-4" /> Content Layers
+      </h3>
+
+      <div className="space-y-1">
         {sections.map((section, index) => (
           <div
             key={section.id}
@@ -40,37 +54,54 @@ const SectionList = ({ sections, moveSection, removeSection }) => {
             onDragStart={() => handleDragStart(index)}
             onDrop={() => handleDrop(index)}
             onDragOver={(e) => e.preventDefault()}
-            className={`flex items-center justify-between p-2 border-b ${
-              draggedIndex === index ? "bg-gray-200" : ""
-            }`}
+            className={`group flex items-center justify-between p-2 rounded-lg border transition-all
+              ${
+                draggedIndex === index
+                  ? "border-blue-200 bg-blue-50 shadow-sm"
+                  : "border-transparent hover:border-gray-200 hover:bg-gray-50"
+              }`}
           >
-            <span>
-              {section.type.charAt(0).toUpperCase() + section.type.slice(1)}
-            </span>
-            <div className="flex items-center space-x-2">
-              {/* Move Up/Down Buttons */}
+            <div className="flex items-center gap-3">
+              <span className="text-gray-400 opacity-60 group-hover:opacity-100 transition-opacity">
+                <FiMove className="w-4 h-4" />
+              </span>
+              {sectionIcons[section.type]}
+              <span className="text-sm font-medium text-gray-600">
+                {section.type.charAt(0).toUpperCase() + section.type.slice(1)}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={() => moveUp(index)}
-                className="px-2 py-1 bg-blue-500 text-white rounded mr-2"
+                className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-blue-600"
+                aria-label="Move up"
               >
-                ↑
+                <FiChevronUp className="w-4 h-4" />
               </button>
               <button
                 onClick={() => moveDown(index)}
-                className="px-2 py-1 bg-blue-500 text-white rounded"
+                className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-blue-600"
+                aria-label="Move down"
               >
-                ↓
+                <FiChevronDown className="w-4 h-4" />
               </button>
-              {/* Delete Icon */}
               <button
                 onClick={() => removeSection(section.id)}
-                className="text-red-500 hover:text-red-700"
+                className="p-1.5 hover:bg-red-50 rounded-lg text-red-400 hover:text-red-600"
+                aria-label="Delete section"
               >
-                <FaTrash size={16} />
+                <FiTrash2 className="w-4 h-4" />
               </button>
             </div>
           </div>
         ))}
+
+        {sections.length === 0 && (
+          <div className="text-center p-4 text-gray-400 text-sm">
+            No sections added yet
+          </div>
+        )}
       </div>
     </div>
   );

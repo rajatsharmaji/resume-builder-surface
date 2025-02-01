@@ -1,5 +1,17 @@
 // src/pages/ResumeBuilder.jsx
 import { useState, useRef } from "react";
+import {
+  FiPlus,
+  FiEdit,
+  FiLayout,
+  FiUser,
+  FiBriefcase,
+  FiBook,
+  FiCode,
+  FiAward,
+  FiFileText,
+  FiDownload,
+} from "react-icons/fi";
 import ContextMenu from "../components/ContextMenu";
 import useResume from "../hooks/useResume";
 import SectionList from "../components/SectionList";
@@ -12,81 +24,88 @@ const ResumeBuilder = () => {
   const [selectedSectionId, setSelectedSectionId] = useState(null);
   const resumeRef = useRef(null);
 
+  const sectionTypes = [
+    {
+      id: "header",
+      label: "Header",
+      icon: <FiLayout className="w-5 h-5" />,
+      color: "bg-red-100",
+    },
+    {
+      id: "about",
+      label: "About",
+      icon: <FiUser className="w-5 h-5" />,
+      color: "bg-blue-100",
+    },
+    {
+      id: "experience",
+      label: "Experience",
+      icon: <FiBriefcase className="w-5 h-5" />,
+      color: "bg-green-100",
+    },
+    {
+      id: "education",
+      label: "Education",
+      icon: <FiBook className="w-5 h-5" />,
+      color: "bg-yellow-100",
+    },
+    {
+      id: "skills",
+      label: "Skills",
+      icon: <FiCode className="w-5 h-5" />,
+      color: "bg-purple-100",
+    },
+    {
+      id: "projects",
+      label: "Projects",
+      icon: <FiFileText className="w-5 h-5" />,
+      color: "bg-indigo-100",
+    },
+    {
+      id: "certifications",
+      label: "Certifications",
+      icon: <FiAward className="w-5 h-5" />,
+      color: "bg-pink-100",
+    },
+  ];
+
   const handleRightClick = (e, sectionId) => {
     e.preventDefault();
-    setSelectedSectionId(sectionId); // Store the ID of the clicked section
+    setSelectedSectionId(sectionId);
     setContextMenu({ x: e.pageX, y: e.pageY });
   };
 
-  const handleAddSection = () => {
-    // Open a modal or dropdown to select the type of section to add
-    console.log("Add Section Logic Here");
-  };
-
   const handleRemoveSection = () => {
-    if (selectedSectionId) {
-      removeSection(selectedSectionId); // Remove the selected section
-    }
-    setContextMenu(null); // Close the context menu
+    if (selectedSectionId) removeSection(selectedSectionId);
+    setContextMenu(null);
   };
 
   return (
-    <div className="min-h-screen p-8 bg-gray-100 flex">
-      {/* Left Section: Builder Controls */}
-      <div className="w-1/4 pr-4">
-        <h2 className="text-xl font-bold mb-4">Resume Builder</h2>
-        <div className="bg-white shadow-md p-4 rounded">
-          {/* Add Section Buttons */}
-          <button
-            onClick={() => addSection("header")}
-            className="block w-full text-left py-2 px-4 mb-2 bg-red-500 text-white rounded hover:bg-red-600"
-          >
-            Add Header Section
-          </button>
-          <button
-            onClick={() => addSection("about")}
-            className="block w-full text-left py-2 px-4 mb-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Add About Section
-          </button>
-          <button
-            onClick={() => addSection("experience")}
-            className="block w-full text-left py-2 px-4 mb-2 bg-green-500 text-white rounded hover:bg-green-600"
-          >
-            Add Experience Section
-          </button>
-          <button
-            onClick={() => addSection("education")}
-            className="block w-full text-left py-2 px-4 mb-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-          >
-            Add Education Section
-          </button>
-          <button
-            onClick={() => addSection("skills")}
-            className="block w-full text-left py-2 px-4 mb-2 bg-purple-500 text-white rounded hover:bg-purple-600"
-          >
-            Add Skills Section
-          </button>
-          <button
-            onClick={() => addSection("projects")}
-            className="block w-full text-left py-2 px-4 mb-2 bg-indigo-500 text-white rounded hover:bg-indigo-600"
-          >
-            Add Projects Section
-          </button>
-          <button
-            onClick={() => addSection("certifications")}
-            className="block w-full text-left py-2 px-4 bg-pink-500 text-white rounded hover:bg-pink-600"
-          >
-            Add Certifications Section
-          </button>
-          <button
-            onClick={() => addSection("footer")}
-            className="block w-full text-left py-2 px-4 mt-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-          >
-            Add Footer Section
-          </button>
+    <div className="min-h-screen p-8 bg-gray-50 flex gap-6 font-sans">
+      {/* Left Panel - Controls */}
+      <div className="w-72 flex flex-col gap-4">
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-700">
+            <FiEdit className="w-5 h-5" /> Resume Builder
+          </h2>
+
+          <div className="grid grid-cols-2 gap-2">
+            {sectionTypes.map(({ id, label, icon, color }) => (
+              <button
+                key={id}
+                onClick={() => addSection(id)}
+                className={`p-3 rounded-lg flex flex-col items-center gap-2 hover:scale-[1.02] transition-transform ${color} hover:${color.replace(
+                  "100",
+                  "200"
+                )} text-gray-600`}
+              >
+                {icon}
+                <span className="text-xs font-medium">{label}</span>
+              </button>
+            ))}
+          </div>
         </div>
-        {/* Layer Section */}
+
         <SectionList
           sections={sections}
           moveSection={moveSection}
@@ -94,45 +113,48 @@ const ResumeBuilder = () => {
         />
       </div>
 
-      {/* Right Section: Resume Preview */}
-      <div className="w-3/4 pl-4">
-        <h2 className="text-xl font-bold mb-4">Resume Preview</h2>
-        <div className="bg-white shadow-md p-6 rounded relative">
+      {/* Right Panel - Preview */}
+      <div className="flex-1 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold flex items-center gap-2 text-gray-700">
+            <FiLayout className="w-5 h-5" /> Resume Preview
+          </h2>
+          <DownloadButton contentRef={resumeRef} />
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 relative">
           {contextMenu && (
             <ContextMenu
               x={contextMenu.x}
               y={contextMenu.y}
               closeMenu={() => setContextMenu(null)}
-              onAddSection={handleAddSection}
               onRemoveSection={handleRemoveSection}
             />
           )}
-          <div ref={resumeRef}>
+
+          <div ref={resumeRef} className="space-y-6">
             {sections.length > 0 ? (
-              <div>
-                {sections.map((section, index) => (
-                  <div
-                    key={section.id}
-                    onContextMenu={(e) => handleRightClick(e, section.id)}
-                  >
-                    <DraggableSection
-                      section={section}
-                      index={index}
-                      moveSection={moveSection}
-                      removeSection={removeSection}
-                    />
-                  </div>
-                ))}
-              </div>
+              sections.map((section, index) => (
+                <div
+                  key={section.id}
+                  onContextMenu={(e) => handleRightClick(e, section.id)}
+                  className="group relative hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  <DraggableSection
+                    section={section}
+                    index={index}
+                    moveSection={moveSection}
+                    removeSection={removeSection}
+                  />
+                </div>
+              ))
             ) : (
-              <p>No content to display</p>
+              <div className="text-center py-12 text-gray-400">
+                <FiPlus className="w-12 h-12 mx-auto mb-4" />
+                <p>Click buttons on the left to add sections</p>
+              </div>
             )}
           </div>
-        </div>
-        <div className="mt-4 text-center">
-          <DownloadButton contentRef={resumeRef}>
-            Download Resume
-          </DownloadButton>
         </div>
       </div>
     </div>
