@@ -1,10 +1,10 @@
+// src/components/ResumeBuilder.jsx
 import { useState, useRef } from "react";
 import useResume from "../hooks/useResume";
 import ElementsPanel from "../components/ElementsPanel";
 import LayersPanel from "../components/LayersPanel";
 import PreviewPanel from "../components/PreviewPanel";
 import RightPanel from "../components/RightPanel";
-
 import {
   FiAward,
   FiBook,
@@ -21,7 +21,7 @@ const ResumeBuilder = () => {
   const [currentTemplate, setCurrentTemplate] = useState("single-column");
   const [customizations, setCustomizations] = useState({
     font: "Roboto",
-    fontSize: 16, // using a number for simplicity
+    fontSize: 16,
     primaryColor: "#007BFF",
     secondaryColor: "#F8F9FA",
     spacing: "1rem",
@@ -75,6 +75,12 @@ const ResumeBuilder = () => {
       icon: <FiAward className="w-5 h-5" />,
       color: "bg-pink-100",
     },
+    {
+      id: "footer",
+      label: "Footer",
+      icon: <FiLayout className="w-5 h-5" />,
+      color: "bg-red-100",
+    },
   ];
 
   // Handle template selection
@@ -91,22 +97,48 @@ const ResumeBuilder = () => {
     }));
   };
 
-  // Handle drop for adding sections
+  // Wrap moveSection to prevent moving locked sections
+  const handleMoveSection = (draggedId, targetIndex) => {
+    const draggedSection = sections.find((s) => s.id === draggedId);
+    if (draggedSection) {
+      if (draggedSection.type === "header") {
+        alert("Header must always remain at the top.");
+        return;
+      }
+      if (draggedSection.type === "footer") {
+        alert("Footer must always remain at the bottom.");
+        return;
+      }
+    }
+    moveSection(draggedId, targetIndex);
+  };
+
+  // Handle drop when adding new sections.
+  // For header and footer, force their locked positions.
   const handleDrop = (e) => {
     e.preventDefault();
+    e.stopPropagation(); // Prevent duplicate drop events
     const sectionId = e.dataTransfer.getData("sectionId");
     if (!sectionId) return;
-    const previewRect = resumeRef.current.getBoundingClientRect();
-    const dropY = e.clientY - previewRect.top;
-    const sectionNodes = Array.from(resumeRef.current.children);
-    let insertIndex = sections.length;
-    for (let i = 0; i < sectionNodes.length; i++) {
-      const node = sectionNodes[i];
-      const nodeRect = node.getBoundingClientRect();
-      const nodeMidpoint = nodeRect.top - previewRect.top + nodeRect.height / 2;
-      if (dropY < nodeMidpoint) {
-        insertIndex = i;
-        break;
+    let insertIndex;
+    if (sectionId === "header") {
+      insertIndex = 0;
+    } else if (sectionId === "footer") {
+      insertIndex = sections.length;
+    } else {
+      const previewRect = resumeRef.current.getBoundingClientRect();
+      const dropY = e.clientY - previewRect.top;
+      const sectionNodes = Array.from(resumeRef.current.children);
+      insertIndex = sections.length;
+      for (let i = 0; i < sectionNodes.length; i++) {
+        const node = sectionNodes[i];
+        const nodeRect = node.getBoundingClientRect();
+        const nodeMidpoint =
+          nodeRect.top - previewRect.top + nodeRect.height / 2;
+        if (dropY < nodeMidpoint) {
+          insertIndex = i;
+          break;
+        }
       }
     }
     addSection(sectionId, insertIndex);
@@ -130,7 +162,7 @@ const ResumeBuilder = () => {
           <h2 className="text-xl font-semibold mb-4">Layers</h2>
           <LayersPanel
             sections={sections}
-            moveSection={moveSection}
+            moveSection={handleMoveSection}
             removeSection={removeSection}
           />
         </div>
@@ -156,7 +188,7 @@ const ResumeBuilder = () => {
           <PreviewPanel
             resumeRef={resumeRef}
             sections={sections}
-            moveSection={moveSection}
+            moveSection={handleMoveSection}
             removeSection={removeSection}
             contextMenu={contextMenu}
             setContextMenu={setContextMenu}

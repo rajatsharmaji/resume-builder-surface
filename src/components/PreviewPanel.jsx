@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+// src/components/PreviewPanel.jsx
 import PropTypes from "prop-types";
 import { FiLayout } from "react-icons/fi";
 import DownloadButton from "./DownloadButton";
@@ -18,15 +19,18 @@ const PreviewPanel = ({
   customizations,
   finalMode, // if true, show a clean final preview
 }) => {
-  /**
-   * SectionWrapper decides how each section is rendered.
-   * In finalMode, we skip borders and interactions entirely.
-   */
+  // Separate header and footer from other sections
+  const headerSection = sections.find((s) => s.type === "header");
+  const footerSection = sections.find((s) => s.type === "footer");
+  const otherSections = sections.filter(
+    (s) => s.type !== "header" && s.type !== "footer"
+  );
+
+  // SectionWrapper wraps each section
   const SectionWrapper = ({ section, index }) => {
     return (
       <div
         onContextMenu={(e) => {
-          // Only allow context menu if not in final mode
           if (!finalMode) handleRightClick(e, section.id);
         }}
         className={
@@ -52,64 +56,70 @@ const PreviewPanel = ({
     </div>
   );
 
-  /**
-   * Helper functions to render different layout templates:
-   * - Two-column
-   * - Grid
-   * - Single column
-   */
-  const renderColumns = (leftTypes, rightTypes) => {
-    const leftSections = sections.filter((s) => leftTypes.includes(s.type));
-    const rightSections = sections.filter((s) => rightTypes.includes(s.type));
+  // Render layout based on currentTemplate
+  let content;
+  if (currentTemplate === "two-column") {
+    // In two-column mode, header and footer are rendered separately.
+    // The remaining sections are split evenly.
+    const mid = Math.ceil(otherSections.length / 2);
+    const leftSections = otherSections.slice(0, mid);
+    const rightSections = otherSections.slice(mid);
 
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="space-y-6">
-          {leftSections.map((section, i) => (
-            <SectionWrapper key={section.id} section={section} index={i} />
-          ))}
-          {leftSections.length === 0 && <EmptyColumnMessage />}
+    content = (
+      <>
+        {headerSection && <SectionWrapper section={headerSection} index={0} />}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            {leftSections.map((section, i) => (
+              <SectionWrapper key={section.id} section={section} index={i} />
+            ))}
+            {leftSections.length === 0 && <EmptyColumnMessage />}
+          </div>
+          <div className="space-y-6">
+            {rightSections.map((section, i) => (
+              <SectionWrapper key={section.id} section={section} index={i} />
+            ))}
+            {rightSections.length === 0 && <EmptyColumnMessage />}
+          </div>
         </div>
-        <div className="space-y-6">
-          {rightSections.map((section, i) => (
-            <SectionWrapper key={section.id} section={section} index={i} />
-          ))}
-          {rightSections.length === 0 && <EmptyColumnMessage />}
-        </div>
-      </div>
+        {footerSection && <SectionWrapper section={footerSection} index={0} />}
+      </>
     );
-  };
-
-  const renderGrid = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {sections.map((section, i) => (
-        <SectionWrapper key={section.id} section={section} index={i} />
-      ))}
-    </div>
-  );
-
-  const renderSingleColumn = () => (
-    <div className="space-y-6">
-      {sections.map((section, i) => (
-        <SectionWrapper key={section.id} section={section} index={i} />
-      ))}
-    </div>
-  );
+  } else if (currentTemplate === "grid") {
+    // In grid mode, header is at the top and footer at the bottom.
+    content = (
+      <>
+        {headerSection && <SectionWrapper section={headerSection} index={0} />}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {otherSections.map((section, i) => (
+            <SectionWrapper key={section.id} section={section} index={i} />
+          ))}
+        </div>
+        {footerSection && <SectionWrapper section={footerSection} index={0} />}
+      </>
+    );
+  } else {
+    // Single-column: header, then other sections, then footer.
+    content = (
+      <>
+        {headerSection && <SectionWrapper section={headerSection} index={0} />}
+        {otherSections.map((section, i) => (
+          <SectionWrapper key={section.id} section={section} index={i} />
+        ))}
+        {footerSection && <SectionWrapper section={footerSection} index={0} />}
+      </>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col gap-4 h-full">
-      {/* 
-        Top header bar:
-        - In edit mode, show "Resume Preview" + Download button (which can be disabled).
-        - In final mode, show a simpler header. 
-      */}
+      {/* Top header bar */}
       {!finalMode && (
         <div className="flex items-center justify-between px-4 py-3 bg-white border-b">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <FiLayout className="text-blue-600" />
             <span className="text-gray-800">Resume Preview</span>
           </h2>
-          {/* Download button is disabled unless finalMode is toggled */}
           <DownloadButton contentRef={resumeRef} disableDownload={!finalMode} />
         </div>
       )}
@@ -119,7 +129,6 @@ const PreviewPanel = ({
           <h2 className="text-lg font-semibold text-gray-800">
             Final Resume Preview
           </h2>
-          {/* If you want the download button visible in final mode, show it here: */}
           <div className="mt-2">
             <DownloadButton contentRef={resumeRef} disableDownload={false} />
           </div>
@@ -142,7 +151,6 @@ const PreviewPanel = ({
           ref={resumeRef}
           className="mx-auto max-w-4xl bg-white rounded-xl shadow-sm p-8 transition-all duration-300"
         >
-          {/* Context Menu only in edit mode */}
           {contextMenu && !finalMode && (
             <ContextMenu
               x={contextMenu.x}
@@ -151,16 +159,7 @@ const PreviewPanel = ({
               onRemove={() => removeSection(contextMenu.sectionId)}
             />
           )}
-
-          {/* Render based on the chosen template */}
-          {currentTemplate === "two-column"
-            ? renderColumns(
-                ["header", "about", "skills"],
-                ["experience", "education", "projects"]
-              )
-            : currentTemplate === "grid"
-            ? renderGrid()
-            : renderSingleColumn()}
+          {content}
         </div>
       </div>
     </div>
