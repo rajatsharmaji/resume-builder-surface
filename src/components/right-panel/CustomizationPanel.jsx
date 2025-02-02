@@ -27,7 +27,6 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
           className="flex items-center text-sm font-medium text-red-600 hover:text-red-700 transition-colors focus:outline-none"
         >
           <FiRefreshCw className="mr-2 w-5 h-5" />
-          Reset to Defaults
         </button>
       </div>
 
