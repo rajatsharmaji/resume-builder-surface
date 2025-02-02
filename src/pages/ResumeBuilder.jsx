@@ -1,8 +1,5 @@
-// src/pages/ResumeBuilder.jsx
 import { useState, useRef } from "react";
 import {
-  FiPlus,
-  FiEdit,
   FiLayout,
   FiUser,
   FiBriefcase,
@@ -11,16 +8,16 @@ import {
   FiAward,
   FiFileText,
 } from "react-icons/fi";
-import ContextMenu from "../components/ContextMenu";
 import useResume from "../hooks/useResume";
-import SectionList from "../components/SectionList";
-import DraggableSection from "../components/DraggableSection";
-import DownloadButton from "../components/DownloadButton";
+import ElementsPanel from "../components/ElementsPanel";
+import LayersPanel from "../components/LayersPanel";
+import PreviewPanel from "../components/PreviewPanel";
+import TemplatePanel from "../components/TemplatePanel";
 
 const ResumeBuilder = () => {
+  // Assume addSection supports an optional insertion index
   const { sections, addSection, moveSection, removeSection } = useResume();
   const [contextMenu, setContextMenu] = useState(null);
-  const [selectedSectionId, setSelectedSectionId] = useState(null);
   const resumeRef = useRef(null);
 
   const sectionTypes = [
@@ -70,88 +67,69 @@ const ResumeBuilder = () => {
 
   const handleRightClick = (e, sectionId) => {
     e.preventDefault();
-    setSelectedSectionId(sectionId);
-    setContextMenu({ x: e.pageX, y: e.pageY });
+    setContextMenu({ x: e.pageX, y: e.pageY, sectionId });
   };
 
-  const handleRemoveSection = () => {
-    if (selectedSectionId) removeSection(selectedSectionId);
-    setContextMenu(null);
+  // Drop event handler for the Preview panel
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const sectionId = e.dataTransfer.getData("sectionId");
+    if (!sectionId) return;
+
+    // Calculate drop position relative to the preview container
+    const previewRect = resumeRef.current.getBoundingClientRect();
+    const dropY = e.clientY - previewRect.top;
+
+    // Determine the insertion index by comparing with each section's midpoint
+    const sectionNodes = Array.from(resumeRef.current.children);
+    let insertIndex = sections.length; // default: append to end
+    for (let i = 0; i < sectionNodes.length; i++) {
+      const node = sectionNodes[i];
+      const nodeRect = node.getBoundingClientRect();
+      const nodeMidpoint = nodeRect.top - previewRect.top + nodeRect.height / 2;
+      if (dropY < nodeMidpoint) {
+        insertIndex = i;
+        break;
+      }
+    }
+    addSection(sectionId, insertIndex);
+  };
+
+  // Drag event handler for elements
+  const handleDragStart = (e, sectionId) => {
+    e.dataTransfer.setData("sectionId", sectionId);
   };
 
   return (
-    <div className="min-h-screen p-8 bg-gray-50 flex gap-6 font-sans">
-      {/* Left Panel - Controls */}
-      <div className="w-72 flex flex-col gap-4">
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-700">
-            <FiEdit className="w-5 h-5" /> Resume Builder
-          </h2>
-          <div className="grid grid-cols-2 gap-2">
-            {sectionTypes.map(({ id, label, icon, color }) => (
-              <button
-                key={id}
-                onClick={() => addSection(id)}
-                className={`p-3 rounded-lg flex flex-col items-center gap-2 hover:scale-[1.02] transition-transform ${color} hover:${color.replace(
-                  "100",
-                  "200"
-                )} text-gray-600`}
-              >
-                {icon}
-                <span className="text-xs font-medium">{label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-        <SectionList
+    <div className="min-h-screen bg-gray-50 flex gap-6 font-sans">
+      {/* Left Panel: Fixed Controls */}
+      <div className="w-72 sticky top-0 h-screen flex flex-col gap-4 overflow-hidden">
+        <ElementsPanel
+          sectionTypes={sectionTypes}
+          addSection={addSection}
+          handleDragStart={handleDragStart}
+        />
+        <LayersPanel
           sections={sections}
           moveSection={moveSection}
           removeSection={removeSection}
         />
       </div>
 
-      {/* Right Panel - Preview */}
-      <div className="flex-1 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold flex items-center gap-2 text-gray-700">
-            <FiLayout className="w-5 h-5" /> Resume Preview
-          </h2>
-          <DownloadButton contentRef={resumeRef} />
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 relative">
-          {contextMenu && (
-            <ContextMenu
-              x={contextMenu.x}
-              y={contextMenu.y}
-              closeMenu={() => setContextMenu(null)}
-              onRemoveSection={handleRemoveSection}
-            />
-          )}
-          <div ref={resumeRef} className="space-y-6">
-            {sections.length > 0 ? (
-              sections.map((section, index) => (
-                <div
-                  key={section.id}
-                  onContextMenu={(e) => handleRightClick(e, section.id)}
-                  className="group relative hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <DraggableSection
-                    section={section}
-                    index={index}
-                    moveSection={moveSection}
-                    removeSection={removeSection}
-                  />
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-12 text-gray-400">
-                <FiPlus className="w-12 h-12 mx-auto mb-4" />
-                <p>Click buttons on the left to add sections</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* Middle Panel: Preview */}
+      <PreviewPanel
+        resumeRef={resumeRef}
+        sections={sections}
+        moveSection={moveSection}
+        removeSection={removeSection}
+        contextMenu={contextMenu}
+        setContextMenu={setContextMenu}
+        handleRightClick={handleRightClick}
+        handleDrop={handleDrop}
+      />
+
+      {/* Right Panel: Templates */}
+      <TemplatePanel />
     </div>
   );
 };

@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import { ResumeContext } from "../context/resume-context";
 
-// Create the context
-
 // Provider component
 const ResumeProvider = ({ children }) => {
   // Retrieve data from localStorage or initialize with default values
@@ -34,9 +32,17 @@ const ResumeProvider = ({ children }) => {
   }, [sections, sectionsData]);
 
   // Add a new section
-  const addSection = (type) => {
+  // Updated to optionally accept an insertion index.
+  const addSection = (type, insertIndex) => {
     const newSection = { id: Date.now(), type };
-    setSections((prev) => [...prev, newSection]);
+    setSections((prev) => {
+      if (typeof insertIndex === "number") {
+        const newSections = [...prev];
+        newSections.splice(insertIndex, 0, newSection);
+        return newSections;
+      }
+      return [...prev, newSection];
+    });
     setSectionsData((prev) => ({
       ...prev,
       [newSection.id]: { type, content: {} },
@@ -91,4 +97,5 @@ const ResumeProvider = ({ children }) => {
     <ResumeContext.Provider value={value}>{children}</ResumeContext.Provider>
   );
 };
+
 export default ResumeProvider;
