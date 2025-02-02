@@ -2,7 +2,7 @@
 import { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import { FiFileText } from "react-icons/fi"; // Import an icon for visual appeal
-import { ResumeContext } from "../context/resume-context";
+import { ResumeContext } from "../../context/resume-context";
 
 const FooterSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);

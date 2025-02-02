@@ -1,14 +1,14 @@
 /* eslint-disable react/prop-types */
 // src/components/DraggableSection.jsx
 import { FaTrashAlt, FaGripVertical } from "react-icons/fa";
-import HeaderSection from "./HeaderSection";
-import FooterSection from "./FooterSection";
-import EducationSection from "./EducationSection";
-import ExperienceSection from "./ExperienceSection";
-import SkillsSection from "./SkillsSection";
-import AboutSection from "./AboutSection";
-import ProjectsSection from "./ProjectsSection";
-import CertificationsSection from "./CertificationsSection";
+import HeaderSection from "../sections/HeaderSection";
+import FooterSection from "../sections/FooterSection";
+import EducationSection from "../sections/EducationSection";
+import ExperienceSection from "../sections/ExperienceSection";
+import SkillsSection from "../sections/SkillsSection";
+import AboutSection from "../sections/AboutSection";
+import ProjectsSection from "../sections/ProjectsSection";
+import CertificationsSection from "../sections/CertificationsSection";
 
 // Map section "type" to the actual component
 const sectionComponents = {

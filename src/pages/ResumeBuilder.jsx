@@ -1,9 +1,9 @@
 import { useState, useRef } from "react";
 import useResume from "../hooks/useResume";
-import ElementsPanel from "../components/ElementsPanel";
-import LayersPanel from "../components/LayersPanel";
-import PreviewPanel from "../components/PreviewPanel";
-import RightPanel from "../components/RightPanel";
+import ElementsPanel from "../components//left-panel/ElementsPanel";
+import LayersPanel from "../components/left-panel/LayersPanel";
+import PreviewPanel from "../components/preview-panel/PreviewPanel";
+import RightPanel from "../components/right-panel/RightPanel";
 import {
   FiAward,
   FiBook,

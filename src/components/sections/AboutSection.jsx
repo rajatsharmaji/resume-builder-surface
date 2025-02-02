@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import { FiUser } from "react-icons/fi";
-import { ResumeContext } from "../context/resume-context";
+import { ResumeContext } from "../../context/resume-context";
 
 const AboutSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);

@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import SectionList from "./SectionList"; // adjust the path if needed
+import SectionList from "../SectionList"; // adjust the path if needed
 
 const LayersPanel = ({ sections, moveSection, removeSection }) => {
   return (

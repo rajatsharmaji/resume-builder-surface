@@ -2,7 +2,7 @@
 // src/components/PreviewPanel.jsx
 import PropTypes from "prop-types";
 import { FiLayout } from "react-icons/fi";
-import DownloadButton from "./DownloadButton";
+import DownloadButton from "../DownloadButton";
 import ContextMenu from "./ContextMenu";
 import DraggableSection from "./DraggableSection";
 

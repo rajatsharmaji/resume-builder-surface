@@ -2,7 +2,7 @@
 import { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import { FiBook } from "react-icons/fi"; // Import an icon for visual appeal
-import { ResumeContext } from "../context/resume-context";
+import { ResumeContext } from "../../context/resume-context";
 
 const EducationSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);

@@ -2,7 +2,7 @@
 import { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import { FiUser, FiMail, FiPhone, FiLinkedin, FiGithub } from "react-icons/fi"; // Import icons for visual appeal
-import { ResumeContext } from "../context/resume-context";
+import { ResumeContext } from "../../context/resume-context";
 
 const HeaderSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);
