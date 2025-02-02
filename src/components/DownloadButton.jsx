@@ -5,7 +5,12 @@ import jsPDF from "jspdf";
 import { parse, formatHex } from "culori";
 import domtoimage from "dom-to-image";
 
-const DownloadButton = ({ children, contentRef, className }) => {
+const DownloadButton = ({
+  children,
+  contentRef,
+  className,
+  disableDownload,
+}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -49,9 +54,6 @@ const DownloadButton = ({ children, contentRef, className }) => {
       const clone = contentRef.current.cloneNode(true);
       prepareClonedContent(clone);
 
-      // Debugging: Log the processed HTML
-      console.log(clone.outerHTML);
-
       // Create a temporary container for rendering
       const tempContainer = document.createElement("div");
       tempContainer.style.cssText = "position: fixed; left: -9999px;";
@@ -74,7 +76,6 @@ const DownloadButton = ({ children, contentRef, className }) => {
     }
   };
 
-  // Update generatePDF to accept a data URL instead of a canvas
   const generatePDF = async (dataUrl) => {
     const pdf = new jsPDF("p", "mm", "a4");
     const pageWidth = pdf.internal.pageSize.getWidth();
@@ -99,8 +100,12 @@ const DownloadButton = ({ children, contentRef, className }) => {
     <div className="relative">
       <button
         onClick={handleDownload}
-        disabled={isLoading}
-        className={`inline-flex items-center gap-2 px-6 py-3 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors ${className}`}
+        disabled={isLoading || disableDownload}
+        className={`inline-flex items-center gap-2 px-6 py-3 font-medium text-white rounded-lg transition-colors ${
+          disableDownload
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700"
+        } ${className}`}
       >
         {isLoading ? (
           <FiLoader className="animate-spin" />
@@ -109,6 +114,11 @@ const DownloadButton = ({ children, contentRef, className }) => {
         )}
         {children || "Download PDF"}
       </button>
+      {disableDownload && (
+        <p className="mt-2 text-sm text-gray-600">
+          Switch to Final Preview to download the clean resume.
+        </p>
+      )}
       {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
     </div>
   );
@@ -119,6 +129,7 @@ DownloadButton.propTypes = {
   contentRef: PropTypes.shape({ current: PropTypes.instanceOf(Element) })
     .isRequired,
   className: PropTypes.string,
+  disableDownload: PropTypes.bool,
 };
 
 export default DownloadButton;

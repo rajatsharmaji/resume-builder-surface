@@ -21,11 +21,14 @@ const ResumeBuilder = () => {
   const [currentTemplate, setCurrentTemplate] = useState("single-column");
   const [customizations, setCustomizations] = useState({
     font: "Roboto",
-    fontSize: "16px",
+    fontSize: 16, // using a number for simplicity
     primaryColor: "#007BFF",
     secondaryColor: "#F8F9FA",
     spacing: "1rem",
+    textColor: "#000000",
+    backgroundColor: "#ffffff",
   });
+  const [isFinalPreview, setIsFinalPreview] = useState(false);
   const resumeRef = useRef(null);
 
   // Define section types for the Elements Panel
@@ -88,6 +91,27 @@ const ResumeBuilder = () => {
     }));
   };
 
+  // Handle drop for adding sections
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const sectionId = e.dataTransfer.getData("sectionId");
+    if (!sectionId) return;
+    const previewRect = resumeRef.current.getBoundingClientRect();
+    const dropY = e.clientY - previewRect.top;
+    const sectionNodes = Array.from(resumeRef.current.children);
+    let insertIndex = sections.length;
+    for (let i = 0; i < sectionNodes.length; i++) {
+      const node = sectionNodes[i];
+      const nodeRect = node.getBoundingClientRect();
+      const nodeMidpoint = nodeRect.top - previewRect.top + nodeRect.height / 2;
+      if (dropY < nodeMidpoint) {
+        insertIndex = i;
+        break;
+      }
+    }
+    addSection(sectionId, insertIndex);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 font-sans flex">
       {/* Left Panel */}
@@ -114,30 +138,20 @@ const ResumeBuilder = () => {
 
       {/* Middle Panel: Resume Preview */}
       <div className="flex-1 h-screen overflow-y-auto p-6">
+        {/* Toggle button for switching preview mode */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => setIsFinalPreview((prev) => !prev)}
+            className="px-4 py-2 rounded-lg border border-gray-300 bg-white shadow-sm text-gray-800 hover:bg-gray-100 transition-colors"
+          >
+            {isFinalPreview ? "Edit Mode" : "Final Preview"}
+          </button>
+        </div>
         <div
           className="bg-white p-8 rounded-lg shadow-lg mx-auto"
           style={{ maxWidth: "800px" }}
           onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            const sectionId = e.dataTransfer.getData("sectionId");
-            if (!sectionId) return;
-            const previewRect = resumeRef.current.getBoundingClientRect();
-            const dropY = e.clientY - previewRect.top;
-            const sectionNodes = Array.from(resumeRef.current.children);
-            let insertIndex = sections.length;
-            for (let i = 0; i < sectionNodes.length; i++) {
-              const node = sectionNodes[i];
-              const nodeRect = node.getBoundingClientRect();
-              const nodeMidpoint =
-                nodeRect.top - previewRect.top + nodeRect.height / 2;
-              if (dropY < nodeMidpoint) {
-                insertIndex = i;
-                break;
-              }
-            }
-            addSection(sectionId, insertIndex);
-          }}
+          onDrop={handleDrop}
         >
           <PreviewPanel
             resumeRef={resumeRef}
@@ -148,10 +162,14 @@ const ResumeBuilder = () => {
             setContextMenu={setContextMenu}
             handleRightClick={(e, id) => {
               e.preventDefault();
-              setContextMenu({ x: e.pageX, y: e.pageY, sectionId: id });
+              if (!isFinalPreview) {
+                setContextMenu({ x: e.pageX, y: e.pageY, sectionId: id });
+              }
             }}
+            handleDrop={handleDrop}
             currentTemplate={currentTemplate}
             customizations={customizations}
+            finalMode={isFinalPreview}
           />
         </div>
       </div>
