@@ -4,6 +4,7 @@ import ElementsPanel from "../components/ElementsPanel";
 import LayersPanel from "../components/LayersPanel";
 import PreviewPanel from "../components/PreviewPanel";
 import TemplatePanel from "../components/TemplatePanel";
+import CustomizationPanel from "../components/CustomizationPanel";
 import {
   FiAward,
   FiBook,
@@ -90,7 +91,7 @@ const ResumeBuilder = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex gap-6 font-sans">
       {/* Left Panel: Fixed Controls */}
-      <div className="w-72 sticky top-0 h-screen flex flex-col gap-4 overflow-hidden">
+      <div className="w-72 sticky top-0 h-screen flex flex-col gap-4 overflow-y-auto">
         {/* Elements Panel */}
         <ElementsPanel
           sectionTypes={sectionTypes}
@@ -106,51 +107,56 @@ const ResumeBuilder = () => {
       </div>
 
       {/* Middle Panel: Preview */}
-      <PreviewPanel
-        resumeRef={resumeRef}
-        sections={sections}
-        moveSection={moveSection}
-        removeSection={removeSection}
-        contextMenu={contextMenu}
-        setContextMenu={setContextMenu}
-        handleRightClick={(e, id) => {
-          e.preventDefault();
-          setContextMenu({ x: e.pageX, y: e.pageY, sectionId: id });
-        }}
-        handleDrop={(e) => {
-          e.preventDefault();
-          const sectionId = e.dataTransfer.getData("sectionId");
-          if (!sectionId) return;
-
-          const previewRect = resumeRef.current.getBoundingClientRect();
-          const dropY = e.clientY - previewRect.top;
-
-          const sectionNodes = Array.from(resumeRef.current.children);
-          let insertIndex = sections.length; // Default: append to end
-
-          for (let i = 0; i < sectionNodes.length; i++) {
-            const node = sectionNodes[i];
-            const nodeRect = node.getBoundingClientRect();
-            const nodeMidpoint =
-              nodeRect.top - previewRect.top + nodeRect.height / 2;
-            if (dropY < nodeMidpoint) {
-              insertIndex = i;
-              break;
+      <div className="flex-1 min-w-0 overflow-y-auto">
+        <PreviewPanel
+          resumeRef={resumeRef}
+          sections={sections}
+          moveSection={moveSection}
+          removeSection={removeSection}
+          contextMenu={contextMenu}
+          setContextMenu={setContextMenu}
+          handleRightClick={(e, id) => {
+            e.preventDefault();
+            setContextMenu({ x: e.pageX, y: e.pageY, sectionId: id });
+          }}
+          handleDrop={(e) => {
+            e.preventDefault();
+            const sectionId = e.dataTransfer.getData("sectionId");
+            if (!sectionId) return;
+            const previewRect = resumeRef.current.getBoundingClientRect();
+            const dropY = e.clientY - previewRect.top;
+            const sectionNodes = Array.from(resumeRef.current.children);
+            let insertIndex = sections.length; // Default: append to end
+            for (let i = 0; i < sectionNodes.length; i++) {
+              const node = sectionNodes[i];
+              const nodeRect = node.getBoundingClientRect();
+              const nodeMidpoint =
+                nodeRect.top - previewRect.top + nodeRect.height / 2;
+              if (dropY < nodeMidpoint) {
+                insertIndex = i;
+                break;
+              }
             }
-          }
+            addSection(sectionId, insertIndex);
+          }}
+          currentTemplate={currentTemplate}
+          customizations={customizations}
+        />
+      </div>
 
-          addSection(sectionId, insertIndex);
-        }}
-        currentTemplate={currentTemplate}
-        customizations={customizations}
-      />
-
-      {/* Right Panel: Templates */}
-      <TemplatePanel
-        applyTemplate={applyTemplate}
-        customizations={customizations}
-        updateCustomizations={updateCustomizations}
-      />
+      {/* Right Panel: Templates and Customization */}
+      <div className="w-72 sticky top-0 h-screen flex flex-col gap-4 overflow-y-auto">
+        {/* Template Panel */}
+        <TemplatePanel
+          applyTemplate={applyTemplate}
+          customizations={customizations}
+        />
+        {/* Customization Panel */}
+        <CustomizationPanel
+          customizations={customizations}
+          updateCustomizations={updateCustomizations}
+        />
+      </div>
     </div>
   );
 };

@@ -1,10 +1,10 @@
-/* eslint-disable react/prop-types */
+import { useState } from "react";
+import PropTypes from "prop-types";
+import { FiEye } from "react-icons/fi"; // For preview icon
 
-const TemplatePanel = ({
-  applyTemplate,
-  customizations,
-  updateCustomizations,
-}) => {
+const TemplatePanel = ({ applyTemplate, customizations }) => {
+  const [previewTemplate, setPreviewTemplate] = useState(null);
+
   const templates = [
     {
       id: "single-column",
@@ -27,87 +27,74 @@ const TemplatePanel = ({
   ];
 
   return (
-    <div className="w-72 flex flex-col gap-4">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col h-screen sticky top-0">
-        <h2 className="text-lg font-semibold mb-4 text-gray-700 px-4 pt-4">
-          Resume Templates
-        </h2>
-        <div className="overflow-y-auto flex-1 px-4 pb-4 space-y-4">
-          {templates.map((template) => (
-            <div
-              key={template.id}
-              onClick={() => applyTemplate(template.id)}
-              className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${
-                customizations.template === template.id
-                  ? "border-2 border-blue-500 bg-blue-50"
-                  : "hover:bg-gray-50"
-              }`}
+    <div className="mb-6">
+      {/* Header */}
+      <h2 className="text-lg font-semibold mb-4">Resume Templates</h2>
+
+      {/* Template List */}
+      <div className="space-y-4">
+        {templates.map((template) => (
+          <div
+            key={template.id}
+            onClick={() => applyTemplate(template.id)}
+            className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${
+              customizations.template === template.id
+                ? "border-2 border-blue-500 bg-blue-50"
+                : "hover:bg-gray-50"
+            }`}
+          >
+            {/* Thumbnail */}
+            <img
+              src={template.thumbnail}
+              alt={template.name}
+              className="w-full h-32 object-cover rounded-md mb-2"
+            />
+
+            {/* Template Info */}
+            <h3 className="font-medium">{template.name}</h3>
+            <p className="text-sm text-gray-600">{template.description}</p>
+
+            {/* Preview Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering parent click
+                setPreviewTemplate(template);
+              }}
+              className="text-blue-500 hover:text-blue-600 transition-colors mt-2"
             >
-              <img
-                src={template.thumbnail}
-                alt={template.name}
-                className="w-full h-32 object-cover rounded-md mb-2"
-              />
-              <h3 className="text-sm font-medium text-gray-800">
-                {template.name}
-              </h3>
-              <p className="text-xs text-gray-500">{template.description}</p>
-            </div>
-          ))}
-        </div>
-        <div className="px-4 pb-4">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Customize</h3>
-          <div className="space-y-2">
-            <label className="block">
-              Font:
-              <select
-                value={customizations.font}
-                onChange={(e) => updateCustomizations("font", e.target.value)}
-                className="w-full p-2 rounded border border-gray-300 mt-1"
-              >
-                <option value="Roboto">Roboto</option>
-                <option value="Open Sans">Open Sans</option>
-                <option value="Lato">Lato</option>
-              </select>
-            </label>
-            <label className="block">
-              Font Size:
-              <input
-                type="number"
-                value={customizations.fontSize.replace("px", "")}
-                onChange={(e) =>
-                  updateCustomizations("fontSize", `${e.target.value}px`)
-                }
-                className="w-full p-2 rounded border border-gray-300 mt-1"
-              />
-            </label>
-            <label className="block">
-              Primary Color:
-              <input
-                type="color"
-                value={customizations.primaryColor}
-                onChange={(e) =>
-                  updateCustomizations("primaryColor", e.target.value)
-                }
-                className="w-full p-2 rounded mt-1"
-              />
-            </label>
-            <label className="block">
-              Secondary Color:
-              <input
-                type="color"
-                value={customizations.secondaryColor}
-                onChange={(e) =>
-                  updateCustomizations("secondaryColor", e.target.value)
-                }
-                className="w-full p-2 rounded mt-1"
-              />
-            </label>
+              <FiEye className="inline-block mr-1" />
+              Preview
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Preview Modal */}
+      {previewTemplate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg relative max-w-md">
+            {/* Close Button */}
+            <button
+              onClick={() => setPreviewTemplate(null)}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            >
+              ×
+            </button>
+
+            {/* Preview Content */}
+            <h3 className="text-xl font-bold mb-2">{previewTemplate.name}</h3>
+            <p className="text-gray-600">{previewTemplate.description}</p>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
+};
+
+// Prop Types Validation
+TemplatePanel.propTypes = {
+  applyTemplate: PropTypes.func.isRequired,
+  customizations: PropTypes.object.isRequired,
 };
 
 export default TemplatePanel;
