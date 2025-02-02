@@ -1,24 +1,30 @@
 import { useState, useRef } from "react";
-import {
-  FiLayout,
-  FiUser,
-  FiBriefcase,
-  FiBook,
-  FiCode,
-  FiAward,
-  FiFileText,
-} from "react-icons/fi";
-import useResume from "../hooks/useResume"; // Assuming this hook manages resume state
+import useResume from "../hooks/useResume";
 import ElementsPanel from "../components/ElementsPanel";
 import LayersPanel from "../components/LayersPanel";
 import PreviewPanel from "../components/PreviewPanel";
 import TemplatePanel from "../components/TemplatePanel";
+import {
+  FiAward,
+  FiBook,
+  FiBriefcase,
+  FiCode,
+  FiFileText,
+  FiLayout,
+  FiUser,
+} from "react-icons/fi";
 
 const ResumeBuilder = () => {
-  // State management for sections and template selection
   const { sections, addSection, moveSection, removeSection } = useResume();
   const [contextMenu, setContextMenu] = useState(null);
-  const [currentTemplate, setCurrentTemplate] = useState("classic"); // Default template
+  const [currentTemplate, setCurrentTemplate] = useState("single-column");
+  const [customizations, setCustomizations] = useState({
+    font: "Roboto",
+    fontSize: "16px",
+    primaryColor: "#007BFF",
+    secondaryColor: "#F8F9FA",
+    spacing: "1rem",
+  });
   const resumeRef = useRef(null);
 
   // Define section types for the Elements Panel
@@ -67,47 +73,18 @@ const ResumeBuilder = () => {
     },
   ];
 
-  // Handle right-click to show context menu
-  const handleRightClick = (e, sectionId) => {
-    e.preventDefault();
-    setContextMenu({ x: e.pageX, y: e.pageY, sectionId });
-  };
-
-  // Handle drag-and-drop in the Preview Panel
-  const handleDrop = (e) => {
-    e.preventDefault();
-    const sectionId = e.dataTransfer.getData("sectionId");
-    if (!sectionId) return;
-
-    const previewRect = resumeRef.current.getBoundingClientRect();
-    const dropY = e.clientY - previewRect.top;
-
-    const sectionNodes = Array.from(resumeRef.current.children);
-    let insertIndex = sections.length; // Default: append to end
-
-    for (let i = 0; i < sectionNodes.length; i++) {
-      const node = sectionNodes[i];
-      const nodeRect = node.getBoundingClientRect();
-      const nodeMidpoint = nodeRect.top - previewRect.top + nodeRect.height / 2;
-      if (dropY < nodeMidpoint) {
-        insertIndex = i;
-        break;
-      }
-    }
-
-    addSection(sectionId, insertIndex);
-  };
-
-  // Handle drag start for draggable elements
-  const handleDragStart = (e, sectionId) => {
-    e.dataTransfer.setData("sectionId", sectionId);
-  };
-
-  // Apply a selected template
+  // Handle template selection
   const applyTemplate = (templateId) => {
     setCurrentTemplate(templateId);
     console.log(`Applied template: ${templateId}`);
-    // You can implement logic here to dynamically update the resume styles
+  };
+
+  // Update customizations
+  const updateCustomizations = (key, value) => {
+    setCustomizations((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
   };
 
   return (
@@ -118,7 +95,7 @@ const ResumeBuilder = () => {
         <ElementsPanel
           sectionTypes={sectionTypes}
           addSection={addSection}
-          handleDragStart={handleDragStart}
+          handleDragStart={(e, id) => e.dataTransfer.setData("sectionId", id)}
         />
         {/* Layers Panel */}
         <LayersPanel
@@ -136,13 +113,44 @@ const ResumeBuilder = () => {
         removeSection={removeSection}
         contextMenu={contextMenu}
         setContextMenu={setContextMenu}
-        handleRightClick={handleRightClick}
-        handleDrop={handleDrop}
-        currentTemplate={currentTemplate} // Pass the selected template
+        handleRightClick={(e, id) => {
+          e.preventDefault();
+          setContextMenu({ x: e.pageX, y: e.pageY, sectionId: id });
+        }}
+        handleDrop={(e) => {
+          e.preventDefault();
+          const sectionId = e.dataTransfer.getData("sectionId");
+          if (!sectionId) return;
+
+          const previewRect = resumeRef.current.getBoundingClientRect();
+          const dropY = e.clientY - previewRect.top;
+
+          const sectionNodes = Array.from(resumeRef.current.children);
+          let insertIndex = sections.length; // Default: append to end
+
+          for (let i = 0; i < sectionNodes.length; i++) {
+            const node = sectionNodes[i];
+            const nodeRect = node.getBoundingClientRect();
+            const nodeMidpoint =
+              nodeRect.top - previewRect.top + nodeRect.height / 2;
+            if (dropY < nodeMidpoint) {
+              insertIndex = i;
+              break;
+            }
+          }
+
+          addSection(sectionId, insertIndex);
+        }}
+        currentTemplate={currentTemplate}
+        customizations={customizations}
       />
 
       {/* Right Panel: Templates */}
-      <TemplatePanel applyTemplate={applyTemplate} />
+      <TemplatePanel
+        applyTemplate={applyTemplate}
+        customizations={customizations}
+        updateCustomizations={updateCustomizations}
+      />
     </div>
   );
 };

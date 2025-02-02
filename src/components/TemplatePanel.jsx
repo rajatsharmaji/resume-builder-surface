@@ -1,41 +1,30 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
 
-const TemplatePanel = ({ applyTemplate }) => {
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
-
-  // Mock template data
+const TemplatePanel = ({
+  applyTemplate,
+  customizations,
+  updateCustomizations,
+}) => {
   const templates = [
     {
-      id: "classic",
-      name: "Classic",
-      thumbnail: "https://via.placeholder.com/150?text=Classic+Resume",
-      description: "A timeless and professional design.",
+      id: "single-column",
+      name: "Single Column",
+      thumbnail: "https://via.placeholder.com/150?text=Single+Column",
+      description: "A simple, linear layout.",
     },
     {
-      id: "modern",
-      name: "Modern",
-      thumbnail: "https://via.placeholder.com/150?text=Modern+Resume",
-      description: "A sleek and contemporary layout.",
+      id: "two-column",
+      name: "Two Column",
+      thumbnail: "https://via.placeholder.com/150?text=Two+Column",
+      description: "A split layout with a sidebar.",
     },
     {
-      id: "minimalist",
-      name: "Minimalist",
-      thumbnail: "https://via.placeholder.com/150?text=Minimalist+Resume",
-      description: "Clean and simple for maximum impact.",
-    },
-    {
-      id: "creative",
-      name: "Creative",
-      thumbnail: "https://via.placeholder.com/150?text=Creative+Resume",
-      description: "Bold and artistic for creative fields.",
+      id: "grid",
+      name: "Grid Layout",
+      thumbnail: "https://via.placeholder.com/150?text=Grid+Layout",
+      description: "A flexible grid-based design.",
     },
   ];
-
-  const handleTemplateClick = (templateId) => {
-    setSelectedTemplate(templateId);
-    applyTemplate(templateId); // Pass the selected template ID to the parent
-  };
 
   return (
     <div className="w-72 flex flex-col gap-4">
@@ -47,9 +36,9 @@ const TemplatePanel = ({ applyTemplate }) => {
           {templates.map((template) => (
             <div
               key={template.id}
-              onClick={() => handleTemplateClick(template.id)}
+              onClick={() => applyTemplate(template.id)}
               className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${
-                selectedTemplate === template.id
+                customizations.template === template.id
                   ? "border-2 border-blue-500 bg-blue-50"
                   : "hover:bg-gray-50"
               }`}
@@ -65,6 +54,56 @@ const TemplatePanel = ({ applyTemplate }) => {
               <p className="text-xs text-gray-500">{template.description}</p>
             </div>
           ))}
+        </div>
+        <div className="px-4 pb-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Customize</h3>
+          <div className="space-y-2">
+            <label className="block">
+              Font:
+              <select
+                value={customizations.font}
+                onChange={(e) => updateCustomizations("font", e.target.value)}
+                className="w-full p-2 rounded border border-gray-300 mt-1"
+              >
+                <option value="Roboto">Roboto</option>
+                <option value="Open Sans">Open Sans</option>
+                <option value="Lato">Lato</option>
+              </select>
+            </label>
+            <label className="block">
+              Font Size:
+              <input
+                type="number"
+                value={customizations.fontSize.replace("px", "")}
+                onChange={(e) =>
+                  updateCustomizations("fontSize", `${e.target.value}px`)
+                }
+                className="w-full p-2 rounded border border-gray-300 mt-1"
+              />
+            </label>
+            <label className="block">
+              Primary Color:
+              <input
+                type="color"
+                value={customizations.primaryColor}
+                onChange={(e) =>
+                  updateCustomizations("primaryColor", e.target.value)
+                }
+                className="w-full p-2 rounded mt-1"
+              />
+            </label>
+            <label className="block">
+              Secondary Color:
+              <input
+                type="color"
+                value={customizations.secondaryColor}
+                onChange={(e) =>
+                  updateCustomizations("secondaryColor", e.target.value)
+                }
+                className="w-full p-2 rounded mt-1"
+              />
+            </label>
+          </div>
         </div>
       </div>
     </div>
