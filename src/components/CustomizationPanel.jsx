@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
 import { FiRefreshCw } from "react-icons/fi";
-import { motion, AnimatePresence } from "framer-motion";
 
 const CustomizationPanel = ({ customizations, updateCustomizations }) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -33,46 +32,33 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
       </div>
 
       {/* Confirmation Modal */}
-      <AnimatePresence>
-        {isConfirmOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm"
-          >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="bg-white rounded-xl p-6 w-full max-w-sm shadow-2xl"
-            >
-              <h3 className="text-2xl font-semibold text-gray-800 mb-2">
-                Reset Customizations?
-              </h3>
-              <p className="text-gray-600 text-sm mb-6">
-                This will reset all styling to default values. This action
-                cannot be undone.
-              </p>
-              <div className="flex justify-end gap-4">
-                <button
-                  onClick={() => setIsConfirmOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors focus:outline-none"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleReset}
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors focus:outline-none"
-                >
-                  Confirm Reset
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm transition-opacity duration-300">
+          <div className="bg-white rounded-xl p-6 w-full max-w-sm shadow-2xl transform transition-all duration-300">
+            <h3 className="text-2xl font-semibold text-gray-800 mb-2">
+              Reset Customizations?
+            </h3>
+            <p className="text-gray-600 text-sm mb-6">
+              This will reset all styling to default values. This action cannot
+              be undone.
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setIsConfirmOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors focus:outline-none"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReset}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors focus:outline-none"
+              >
+                Confirm Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Customization Controls */}
       <div className="space-y-6">

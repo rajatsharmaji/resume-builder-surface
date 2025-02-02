@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 import TemplatePanel from "./TemplatePanel";
 import CustomizationPanel from "./CustomizationPanel";
-import { motion, AnimatePresence } from "framer-motion";
 
 const RightPanel = ({
   applyTemplate,
@@ -35,24 +34,19 @@ const RightPanel = ({
               <FiChevronDown className="w-5 h-5 text-gray-600" />
             )}
           </button>
-          <AnimatePresence initial={false}>
-            {expandedSections.templates && (
-              <motion.div
-                key="templates-panel"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="px-5 pb-5 overflow-y-auto"
-                style={{ maxHeight: "300px" }}
-              >
-                <TemplatePanel
-                  applyTemplate={applyTemplate}
-                  customizations={customizations}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Fixed-height container for templates */}
+          <div className="px-5 pb-5 h-[300px] overflow-y-auto transition-opacity duration-300">
+            <div
+              className={
+                expandedSections.templates ? "opacity-100" : "opacity-0"
+              }
+            >
+              <TemplatePanel
+                applyTemplate={applyTemplate}
+                customizations={customizations}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Customizations Section */}
@@ -70,24 +64,19 @@ const RightPanel = ({
               <FiChevronDown className="w-5 h-5 text-gray-600" />
             )}
           </button>
-          <AnimatePresence initial={false}>
-            {expandedSections.customizations && (
-              <motion.div
-                key="customizations-panel"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="px-5 pb-5 overflow-y-auto"
-                style={{ maxHeight: "300px" }}
-              >
-                <CustomizationPanel
-                  customizations={customizations}
-                  updateCustomizations={updateCustomizations}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Fixed-height container for customizations */}
+          <div className="px-5 pb-5 h-[300px] overflow-y-auto transition-opacity duration-300">
+            <div
+              className={
+                expandedSections.customizations ? "opacity-100" : "opacity-0"
+              }
+            >
+              <CustomizationPanel
+                customizations={customizations}
+                updateCustomizations={updateCustomizations}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
