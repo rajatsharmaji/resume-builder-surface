@@ -1,20 +1,39 @@
 // src/components/FooterSection.jsx
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import { FiFileText } from "react-icons/fi"; // Import an icon for visual appeal
 import { ResumeContext } from "../context/resume-context";
 
-const FooterSection = ({ sectionId }) => {
+const FooterSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);
 
-  // Retrieve footer content from sectionsData
-  const footer = sectionsData[sectionId]?.content?.note || "";
+  // Retrieve the initial footer note from the context
+  const initialValue = sectionsData[sectionId]?.content.note || "";
+  const [note, setNote] = useState(initialValue);
 
-  // Update the footer content in the global state
-  const handleInputChange = (value) => {
-    updateSectionContent(sectionId, { note: value });
+  // Update local state on each keystroke
+  const handleChange = (e) => {
+    setNote(e.target.value);
   };
 
+  // Update the global context when the user leaves the textarea
+  const handleBlur = () => {
+    updateSectionContent(sectionId, { note });
+  };
+
+  // Render a clean preview if in final mode
+  if (finalMode) {
+    return (
+      <div className="mt-8 py-6 bg-white rounded-lg shadow-sm border-t border-gray-200">
+        <h3 className="text-xl font-semibold text-gray-800 text-center mb-4">
+          Footer
+        </h3>
+        <p className="text-gray-700 text-center whitespace-pre-wrap">{note}</p>
+      </div>
+    );
+  }
+
+  // Render the editable version of the Footer section
   return (
     <div className="border-t border-gray-200 py-6 mt-8 bg-white rounded-lg shadow-sm">
       {/* Header with Icon */}
@@ -30,8 +49,9 @@ const FooterSection = ({ sectionId }) => {
         </label>
         <textarea
           placeholder="Add a note, disclaimer, or links here..."
-          value={footer}
-          onChange={(e) => handleInputChange(e.target.value)}
+          value={note}
+          onChange={handleChange}
+          onBlur={handleBlur}
           className="block w-full h-32 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
         ></textarea>
       </div>
@@ -47,6 +67,7 @@ const FooterSection = ({ sectionId }) => {
 
 FooterSection.propTypes = {
   sectionId: PropTypes.number.isRequired,
+  finalMode: PropTypes.bool,
 };
 
 export default FooterSection;

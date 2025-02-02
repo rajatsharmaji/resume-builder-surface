@@ -1,20 +1,37 @@
 // src/components/SkillsSection.jsx
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import { FiCode } from "react-icons/fi"; // Import an icon for visual appeal
 import { ResumeContext } from "../context/resume-context";
 
-const SkillsSection = ({ sectionId }) => {
+const SkillsSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);
 
-  // Retrieve skills content for this section
-  const skills = sectionsData[sectionId]?.content?.skills || "";
+  // Initialize local state with the skills data from context
+  const initialSkills = sectionsData[sectionId]?.content?.skills || "";
+  const [skills, setSkills] = useState(initialSkills);
 
-  // Update the skills content in the global state
-  const handleInputChange = (value) => {
-    updateSectionContent(sectionId, { skills: value });
+  // Update local state on each keystroke
+  const handleChange = (e) => {
+    setSkills(e.target.value);
   };
 
+  // When the user leaves the input field, update the global context
+  const handleBlur = () => {
+    updateSectionContent(sectionId, { skills });
+  };
+
+  // Render a clean preview if in final mode
+  if (finalMode) {
+    return (
+      <div className="mb-4">
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">Skills</h3>
+        <p className="text-gray-700">{skills}</p>
+      </div>
+    );
+  }
+
+  // Render the editable version of the Skills section
   return (
     <div className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
       {/* Header with Icon */}
@@ -33,7 +50,8 @@ const SkillsSection = ({ sectionId }) => {
           placeholder="Enter skills (comma-separated)"
           className="block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           value={skills}
-          onChange={(e) => handleInputChange(e.target.value)}
+          onChange={handleChange}
+          onBlur={handleBlur}
         />
       </div>
 
@@ -48,6 +66,7 @@ const SkillsSection = ({ sectionId }) => {
 
 SkillsSection.propTypes = {
   sectionId: PropTypes.number.isRequired,
+  finalMode: PropTypes.bool,
 };
 
 export default SkillsSection;
