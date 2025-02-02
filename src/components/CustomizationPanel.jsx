@@ -1,27 +1,86 @@
 import PropTypes from "prop-types";
+import { useState } from "react";
 
 const CustomizationPanel = ({ customizations, updateCustomizations }) => {
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
   // Reset to default customization values
   const handleReset = () => {
     updateCustomizations("font", "Roboto");
     updateCustomizations("fontSize", "16px");
     updateCustomizations("primaryColor", "#007BFF");
     updateCustomizations("secondaryColor", "#F8F9FA");
+    setIsConfirmOpen(false); // Close the confirmation modal after resetting
   };
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Customize Resume</h2>
-      <div className="space-y-5">
+    <div className="p-6 bg-white shadow-lg rounded-lg max-w-md mx-auto">
+      {/* Title */}
+      <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center justify-between">
+        <span>Customize Resume</span>
+        {/* Reset Icon */}
+        <button
+          onClick={() => setIsConfirmOpen(true)}
+          className="text-red-500 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          aria-label="Reset to defaults"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+        </button>
+      </h2>
+
+      {/* Confirmation Modal */}
+      {isConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm text-center">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Reset to Defaults?
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Are you sure you want to reset all customizations to their default
+              values? This action cannot be undone.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={() => setIsConfirmOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReset}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Customization Options */}
+      <div className="space-y-6">
         {/* Font */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Font:
           </label>
           <select
             value={customizations.font}
             onChange={(e) => updateCustomizations("font", e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="Roboto">Roboto</option>
             <option value="Open Sans">Open Sans</option>
@@ -31,8 +90,8 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
 
         {/* Font Size */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Font Size:
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Font Size (px):
           </label>
           <input
             type="number"
@@ -40,13 +99,13 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
             onChange={(e) =>
               updateCustomizations("fontSize", `${e.target.value}px`)
             }
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 
         {/* Primary Color */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Primary Color:
           </label>
           <input
@@ -55,13 +114,13 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
             onChange={(e) =>
               updateCustomizations("primaryColor", e.target.value)
             }
-            className="w-full p-1 rounded-md"
+            className="w-full h-10 p-1 rounded-lg cursor-pointer"
           />
         </div>
 
         {/* Secondary Color */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Secondary Color:
           </label>
           <input
@@ -70,17 +129,9 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
             onChange={(e) =>
               updateCustomizations("secondaryColor", e.target.value)
             }
-            className="w-full p-1 rounded-md"
+            className="w-full h-10 p-1 rounded-lg cursor-pointer"
           />
         </div>
-
-        {/* Reset Button */}
-        <button
-          onClick={handleReset}
-          className="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition-colors"
-        >
-          Reset to Defaults
-        </button>
       </div>
     </div>
   );

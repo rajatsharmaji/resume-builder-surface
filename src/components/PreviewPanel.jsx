@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import PropTypes from "prop-types";
 import { FiLayout } from "react-icons/fi";
 import DownloadButton from "./DownloadButton";
@@ -16,158 +17,143 @@ const PreviewPanel = ({
   currentTemplate,
   customizations,
 }) => {
-  // New function to render sections based on template type
-  const renderSections = () => {
-    if (currentTemplate === "two-column") {
-      // Define which section types belong to the left and right columns.
-      const leftColumnSections = ["header", "about", "skills"];
-      const rightColumnSections = ["experience", "education", "projects"];
+  const renderColumns = (leftTypes, rightTypes) => {
+    const leftSections = sections.filter((s) => leftTypes.includes(s.type));
+    const rightSections = sections.filter((s) => rightTypes.includes(s.type));
 
-      // Filter sections using the section type instead of the unique id.
-      const leftSections = sections.filter((section) =>
-        leftColumnSections.includes(section.type)
-      );
-      const rightSections = sections.filter((section) =>
-        rightColumnSections.includes(section.type)
-      );
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="space-y-6">
+          {leftSections.map((section, index) => (
+            <SectionWrapper
+              key={section.id}
+              section={section}
+              index={index}
+              handleRightClick={handleRightClick}
+              moveSection={moveSection}
+              removeSection={removeSection}
+            />
+          ))}
+          {leftSections.length === 0 && <EmptyColumnMessage />}
+        </div>
 
-      return (
-        <>
-          {/* Left Column */}
-          <div className="space-y-6">
-            {leftSections.length > 0 ? (
-              leftSections.map((section, index) => (
-                <div
-                  key={section.id}
-                  onContextMenu={(e) => handleRightClick(e, section.id)}
-                  className="group relative hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <DraggableSection
-                    section={section}
-                    index={index}
-                    moveSection={moveSection}
-                    removeSection={removeSection}
-                  />
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-12 text-gray-400">
-                <p>Left Column Empty</p>
-              </div>
-            )}
-          </div>
-          {/* Right Column */}
-          <div className="space-y-6">
-            {rightSections.length > 0 ? (
-              rightSections.map((section, index) => (
-                <div
-                  key={section.id}
-                  onContextMenu={(e) => handleRightClick(e, section.id)}
-                  className="group relative hover:bg-gray-50 rounded-lg transition-colors"
-                >
-                  <DraggableSection
-                    section={section}
-                    index={index}
-                    moveSection={moveSection}
-                    removeSection={removeSection}
-                  />
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-12 text-gray-400">
-                <p>Right Column Empty</p>
-              </div>
-            )}
-          </div>
-        </>
-      );
-    } else if (currentTemplate === "grid") {
-      // In grid, simply let CSS grid place the items
-      return sections.map((section, index) => (
-        <div
-          key={section.id}
-          onContextMenu={(e) => handleRightClick(e, section.id)}
-          className="group relative hover:bg-gray-50 rounded-lg transition-colors"
-        >
-          <DraggableSection
-            section={section}
-            index={index}
-            moveSection={moveSection}
-            removeSection={removeSection}
-          />
+        <div className="space-y-6">
+          {rightSections.map((section, index) => (
+            <SectionWrapper
+              key={section.id}
+              section={section}
+              index={index}
+              handleRightClick={handleRightClick}
+              moveSection={moveSection}
+              removeSection={removeSection}
+            />
+          ))}
+          {rightSections.length === 0 && <EmptyColumnMessage />}
         </div>
-      ));
-    } else {
-      // Single-column template
-      return sections.map((section, index) => (
-        <div
-          key={section.id}
-          onContextMenu={(e) => handleRightClick(e, section.id)}
-          className="group relative hover:bg-gray-50 rounded-lg transition-colors"
-        >
-          <DraggableSection
-            section={section}
-            index={index}
-            moveSection={moveSection}
-            removeSection={removeSection}
-          />
-        </div>
-      ));
-    }
+      </div>
+    );
   };
 
-  // Compute layout classes for the inner container (which holds the section items)
-  const innerContainerClasses = () => {
-    switch (currentTemplate) {
-      case "two-column":
-        return "p-8 grid grid-cols-[2fr_3fr] gap-6";
-      case "grid":
-        return "p-8 grid grid-cols-2 gap-4";
-      default:
-        return "p-8 flex flex-col gap-6";
-    }
-  };
+  const renderGrid = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {sections.map((section, index) => (
+        <SectionWrapper
+          key={section.id}
+          section={section}
+          index={index}
+          handleRightClick={handleRightClick}
+          moveSection={moveSection}
+          removeSection={removeSection}
+        />
+      ))}
+    </div>
+  );
+
+  const renderSingleColumn = () => (
+    <div className="space-y-6">
+      {sections.map((section, index) => (
+        <SectionWrapper
+          key={section.id}
+          section={section}
+          index={index}
+          handleRightClick={handleRightClick}
+          moveSection={moveSection}
+          removeSection={removeSection}
+        />
+      ))}
+    </div>
+  );
 
   return (
-    <div className="flex-1 flex flex-col gap-4">
-      {/* Fixed Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold flex items-center gap-2 text-gray-700">
-          <FiLayout className="w-5 h-5" /> Resume Preview
+    <div className="flex-1 flex flex-col gap-4 h-full">
+      {/* Header with Download Button */}
+      <div className="flex items-center justify-between px-4 py-3 bg-white border-b">
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          <FiLayout className="text-blue-600" />
+          <span className="text-gray-800">Resume Preview</span>
         </h2>
         <DownloadButton contentRef={resumeRef} />
       </div>
-      {/* Scrollable Preview Content */}
+
+      {/* Preview Area */}
       <div
-        className="rounded-xl shadow-sm border border-gray-100 relative flex-1 overflow-y-auto"
-        style={{
-          fontFamily: customizations.font,
-          fontSize: customizations.fontSize,
-          color: customizations.primaryColor,
-          backgroundColor: customizations.secondaryColor,
-        }}
+        className="flex-1 overflow-auto bg-gray-50 p-6"
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
+        style={{
+          fontFamily: customizations.font,
+          fontSize: `${customizations.fontSize}px`,
+          color: customizations.textColor,
+          backgroundColor: customizations.backgroundColor,
+        }}
       >
-        {contextMenu && (
-          <ContextMenu
-            x={contextMenu.x}
-            y={contextMenu.y}
-            closeMenu={() => setContextMenu(null)}
-            onRemoveSection={() => removeSection(contextMenu.sectionId)}
-          />
-        )}
-        {/* 
-          The inner container now has the layout classes applied directly.
-          Its children will be arranged according to the chosen template.
-        */}
-        <div ref={resumeRef} className={innerContainerClasses()}>
-          {renderSections()}
+        <div
+          ref={resumeRef}
+          className="mx-auto max-w-4xl bg-white rounded-xl shadow-sm p-8 transition-all duration-300"
+        >
+          {contextMenu && (
+            <ContextMenu
+              x={contextMenu.x}
+              y={contextMenu.y}
+              onClose={() => setContextMenu(null)}
+              onRemove={() => removeSection(contextMenu.sectionId)}
+            />
+          )}
+
+          {currentTemplate === "two-column"
+            ? renderColumns(
+                ["header", "about", "skills"],
+                ["experience", "education", "projects"]
+              )
+            : currentTemplate === "grid"
+            ? renderGrid()
+            : renderSingleColumn()}
         </div>
       </div>
     </div>
   );
 };
+
+// Helper components
+const SectionWrapper = ({ section, index, handleRightClick, ...props }) => (
+  <div
+    onContextMenu={(e) => handleRightClick(e, section.id)}
+    className="group relative hover:bg-gray-50 rounded-lg transition-all duration-200 border border-transparent hover:border-gray-200"
+  >
+    <DraggableSection
+      section={section}
+      index={index}
+      {...props}
+      className="p-4 hover:bg-opacity-50 transition-colors"
+    />
+  </div>
+);
+
+const EmptyColumnMessage = () => (
+  <div className="text-center p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 text-gray-400">
+    Drag sections here to add content
+  </div>
+);
 
 PreviewPanel.propTypes = {
   resumeRef: PropTypes.object.isRequired,
@@ -179,7 +165,12 @@ PreviewPanel.propTypes = {
   handleRightClick: PropTypes.func.isRequired,
   handleDrop: PropTypes.func.isRequired,
   currentTemplate: PropTypes.string.isRequired,
-  customizations: PropTypes.object.isRequired,
+  customizations: PropTypes.shape({
+    font: PropTypes.string,
+    fontSize: PropTypes.number,
+    textColor: PropTypes.string,
+    backgroundColor: PropTypes.string,
+  }).isRequired,
 };
 
 export default PreviewPanel;

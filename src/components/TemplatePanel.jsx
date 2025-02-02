@@ -27,9 +27,11 @@ const TemplatePanel = ({ applyTemplate, customizations }) => {
   ];
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Resume Templates</h2>
-      <div className="space-y-6">
+    <div className="space-y-6">
+      <h2 className="text-xl font-bold text-gray-800 mb-4">Resume Templates</h2>
+
+      {/* Template Cards */}
+      <div className="space-y-4">
         {templates.map((template) => (
           <div
             key={template.id}
@@ -37,7 +39,7 @@ const TemplatePanel = ({ applyTemplate, customizations }) => {
             className={`p-4 rounded-lg cursor-pointer transition-all duration-300 border ${
               customizations.template === template.id
                 ? "border-blue-500 bg-blue-50"
-                : "border-transparent hover:border-gray-300"
+                : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
             }`}
           >
             <img
@@ -45,7 +47,9 @@ const TemplatePanel = ({ applyTemplate, customizations }) => {
               alt={template.name}
               className="w-full h-32 object-cover rounded-md mb-3"
             />
-            <h3 className="font-medium text-lg">{template.name}</h3>
+            <h3 className="font-medium text-lg text-gray-800">
+              {template.name}
+            </h3>
             <p className="text-sm text-gray-600 mb-2">{template.description}</p>
             <button
               onClick={(e) => {
