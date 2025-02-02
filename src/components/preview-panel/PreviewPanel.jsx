@@ -1,10 +1,9 @@
-/* eslint-disable react/prop-types */
-// src/components/PreviewPanel.jsx
 import PropTypes from "prop-types";
 import { FiLayout } from "react-icons/fi";
 import DownloadButton from "../DownloadButton";
 import ContextMenu from "./ContextMenu";
-import DraggableSection from "./DraggableSection";
+// Import the mapping of templates
+import { templateComponents } from "../templates";
 
 const PreviewPanel = ({
   resumeRef,
@@ -15,100 +14,14 @@ const PreviewPanel = ({
   setContextMenu,
   handleRightClick,
   handleDrop,
-  currentTemplate,
+  currentTemplate, // e.g. "latex", "two-column", "grid", or "single-column"
   customizations,
   finalMode, // if true, show a clean final preview
 }) => {
-  // Separate header and footer from other sections
-  const headerSection = sections.find((s) => s.type === "header");
-  const footerSection = sections.find((s) => s.type === "footer");
-  const otherSections = sections.filter(
-    (s) => s.type !== "header" && s.type !== "footer"
-  );
-
-  // SectionWrapper wraps each section
-  const SectionWrapper = ({ section, index }) => {
-    return (
-      <div
-        onContextMenu={(e) => {
-          if (!finalMode) handleRightClick(e, section.id);
-        }}
-        className={
-          finalMode
-            ? "mb-4"
-            : "group relative hover:bg-gray-50 rounded-lg transition-all duration-200 border border-transparent hover:border-gray-200 mb-4"
-        }
-      >
-        <DraggableSection
-          section={section}
-          index={index}
-          finalMode={finalMode}
-          moveSection={moveSection}
-          removeSection={removeSection}
-        />
-      </div>
-    );
-  };
-
-  const EmptyColumnMessage = () => (
-    <div className="text-center p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 text-gray-400">
-      <p className="text-sm font-medium">Drag sections here to add content</p>
-    </div>
-  );
-
-  // Render layout based on currentTemplate
-  let content;
-  if (currentTemplate === "two-column") {
-    // In two-column mode, header and footer are rendered separately.
-    // The remaining sections are split evenly.
-    const mid = Math.ceil(otherSections.length / 2);
-    const leftSections = otherSections.slice(0, mid);
-    const rightSections = otherSections.slice(mid);
-    content = (
-      <>
-        {headerSection && <SectionWrapper section={headerSection} index={0} />}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-6">
-            {leftSections.map((section, i) => (
-              <SectionWrapper key={section.id} section={section} index={i} />
-            ))}
-            {leftSections.length === 0 && <EmptyColumnMessage />}
-          </div>
-          <div className="space-y-6">
-            {rightSections.map((section, i) => (
-              <SectionWrapper key={section.id} section={section} index={i} />
-            ))}
-            {rightSections.length === 0 && <EmptyColumnMessage />}
-          </div>
-        </div>
-        {footerSection && <SectionWrapper section={footerSection} index={0} />}
-      </>
-    );
-  } else if (currentTemplate === "grid") {
-    // In grid mode, header is at the top and footer at the bottom.
-    content = (
-      <>
-        {headerSection && <SectionWrapper section={headerSection} index={0} />}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {otherSections.map((section, i) => (
-            <SectionWrapper key={section.id} section={section} index={i} />
-          ))}
-        </div>
-        {footerSection && <SectionWrapper section={footerSection} index={0} />}
-      </>
-    );
-  } else {
-    // Single-column: header, then other sections, then footer.
-    content = (
-      <>
-        {headerSection && <SectionWrapper section={headerSection} index={0} />}
-        {otherSections.map((section, i) => (
-          <SectionWrapper key={section.id} section={section} index={i} />
-        ))}
-        {footerSection && <SectionWrapper section={footerSection} index={0} />}
-      </>
-    );
-  }
+  // Select the template component based on currentTemplate.
+  // If none is found, fallback to the "single-column" template.
+  const TemplateComponent =
+    templateComponents[currentTemplate] || templateComponents["single-column"];
 
   return (
     <div className="flex-1 flex flex-col gap-4 h-full">
@@ -120,7 +33,7 @@ const PreviewPanel = ({
             {finalMode ? "Final Resume Preview" : "Resume Preview"}
           </span>
         </h2>
-        {/* Hide DownloadButton in Edit Mode */}
+        {/* Only show the DownloadButton in Final Mode */}
         {finalMode && (
           <DownloadButton contentRef={resumeRef} disableDownload={false} />
         )}
@@ -164,7 +77,14 @@ const PreviewPanel = ({
               onRemove={() => removeSection(contextMenu.sectionId)}
             />
           )}
-          {content}
+          {/* Render the chosen template component */}
+          <TemplateComponent
+            sections={sections}
+            finalMode={finalMode}
+            moveSection={moveSection}
+            removeSection={removeSection}
+            handleRightClick={handleRightClick}
+          />
         </div>
       </div>
     </div>

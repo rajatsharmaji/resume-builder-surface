@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import { FaListAlt, FaColumns, FaTh } from "react-icons/fa";
 
 const TemplatePanel = ({ applyTemplate, customizations }) => {
+  // Available templates: only the options that exist.
   const templates = [
     {
       id: "single-column",
@@ -22,6 +23,13 @@ const TemplatePanel = ({ applyTemplate, customizations }) => {
       name: "Grid Layout",
       icon: <FaTh className="w-8 h-8 text-purple-500" />,
       description: "Flexible grid system for creative presentations",
+      color: "bg-purple-50 hover:bg-purple-100",
+    },
+    {
+      id: "latex",
+      name: "Latex Layout",
+      icon: <FaTh className="w-8 h-8 text-purple-500" />,
+      description: "A classic LaTeX-inspired layout",
       color: "bg-purple-50 hover:bg-purple-100",
     },
   ];
@@ -63,7 +71,9 @@ const TemplatePanel = ({ applyTemplate, customizations }) => {
 
 TemplatePanel.propTypes = {
   applyTemplate: PropTypes.func.isRequired,
-  customizations: PropTypes.object.isRequired,
+  customizations: PropTypes.shape({
+    template: PropTypes.string,
+  }).isRequired,
 };
 
 export default TemplatePanel;

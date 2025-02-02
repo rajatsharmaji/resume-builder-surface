@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import useResume from "../hooks/useResume";
-import ElementsPanel from "../components//left-panel/ElementsPanel";
+import ElementsPanel from "../components/left-panel/ElementsPanel";
 import LayersPanel from "../components/left-panel/LayersPanel";
 import PreviewPanel from "../components/preview-panel/PreviewPanel";
 import RightPanel from "../components/right-panel/RightPanel";
@@ -17,7 +17,8 @@ import {
 const ResumeBuilder = () => {
   const { sections, addSection, moveSection, removeSection } = useResume();
   const [contextMenu, setContextMenu] = useState(null);
-  const [currentTemplate, setCurrentTemplate] = useState("single-column");
+  // Use "default" as the default template (maps to your single-column layout)
+  const [currentTemplate, setCurrentTemplate] = useState("default");
   const [customizations, setCustomizations] = useState({
     font: "Roboto",
     fontSize: 16,
@@ -90,7 +91,7 @@ const ResumeBuilder = () => {
     },
   ];
 
-  // Handle template selection
+  // Handle template selection – this function can be invoked from your RightPanel
   const applyTemplate = (templateId) => {
     setCurrentTemplate(templateId);
     console.log(`Applied template: ${templateId}`);
@@ -104,7 +105,7 @@ const ResumeBuilder = () => {
     }));
   };
 
-  // Wrap moveSection to prevent moving locked sections
+  // Wrap moveSection to prevent moving locked sections (header/footer)
   const handleMoveSection = (draggedId, targetIndex) => {
     const draggedSection = sections.find((s) => s.id === draggedId);
     if (draggedSection) {

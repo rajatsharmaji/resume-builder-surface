@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-// src/components/DraggableSection.jsx
 import { FaTrashAlt, FaGripVertical } from "react-icons/fa";
 import HeaderSection from "../sections/HeaderSection";
 import FooterSection from "../sections/FooterSection";
@@ -32,7 +31,7 @@ const DraggableSection = ({
   const Component = sectionComponents[section.type];
   const isLocked = section.type === "header" || section.type === "footer";
 
-  // Drag & drop is only allowed if the section is not locked.
+  // Drag & drop is allowed only if the section is not locked.
   const handleDragStart = (e) => {
     if (isLocked) {
       e.preventDefault();
@@ -81,7 +80,6 @@ const DraggableSection = ({
       className="mb-4 border border-gray-200 rounded-lg p-4 bg-white shadow-sm 
                  relative transition-transform hover:shadow-md hover:-translate-y-1"
     >
-      {/* Show drag handle and delete icon only if not locked */}
       {!isLocked && (
         <>
           <div
