@@ -8,22 +8,23 @@ const RightPanel = ({
   updateCustomizations,
 }) => {
   return (
-    <div className="w-1/4 p-4 bg-gray-100 border-l border-gray-300">
-      {/* Template Panel */}
-      <TemplatePanel
-        applyTemplate={applyTemplate}
-        customizations={customizations}
-      />
-      {/* Customization Panel */}
-      <CustomizationPanel
-        customizations={customizations}
-        updateCustomizations={updateCustomizations}
-      />
+    <div className="w-80 h-screen sticky top-0 overflow-y-auto p-6 bg-white border-l border-gray-200 shadow-md">
+      <div className="mb-6">
+        <TemplatePanel
+          applyTemplate={applyTemplate}
+          customizations={customizations}
+        />
+      </div>
+      <div>
+        <CustomizationPanel
+          customizations={customizations}
+          updateCustomizations={updateCustomizations}
+        />
+      </div>
     </div>
   );
 };
 
-// Prop Types Validation
 RightPanel.propTypes = {
   applyTemplate: PropTypes.func.isRequired,
   customizations: PropTypes.object.isRequired,

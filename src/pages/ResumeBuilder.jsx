@@ -3,8 +3,8 @@ import useResume from "../hooks/useResume";
 import ElementsPanel from "../components/ElementsPanel";
 import LayersPanel from "../components/LayersPanel";
 import PreviewPanel from "../components/PreviewPanel";
-import TemplatePanel from "../components/TemplatePanel";
-import CustomizationPanel from "../components/CustomizationPanel";
+import RightPanel from "../components/RightPanel";
+
 import {
   FiAward,
   FiBook,
@@ -89,44 +89,43 @@ const ResumeBuilder = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex gap-6 font-sans">
-      {/* Left Panel: Fixed Controls */}
-      <div className="w-72 sticky top-0 h-screen flex flex-col gap-4 overflow-y-auto">
+    <div className="min-h-screen bg-gray-100 font-sans flex">
+      {/* Left Panel */}
+      <div className="w-72 h-screen sticky top-0 overflow-y-auto p-4 bg-white border-r border-gray-200 shadow-md">
         {/* Elements Panel */}
-        <ElementsPanel
-          sectionTypes={sectionTypes}
-          addSection={addSection}
-          handleDragStart={(e, id) => e.dataTransfer.setData("sectionId", id)}
-        />
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">Elements</h2>
+          <ElementsPanel
+            sectionTypes={sectionTypes}
+            addSection={addSection}
+            handleDragStart={(e, id) => e.dataTransfer.setData("sectionId", id)}
+          />
+        </div>
         {/* Layers Panel */}
-        <LayersPanel
-          sections={sections}
-          moveSection={moveSection}
-          removeSection={removeSection}
-        />
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Layers</h2>
+          <LayersPanel
+            sections={sections}
+            moveSection={moveSection}
+            removeSection={removeSection}
+          />
+        </div>
       </div>
 
       {/* Middle Panel: Preview */}
-      <div className="flex-1 min-w-0 overflow-y-auto">
-        <PreviewPanel
-          resumeRef={resumeRef}
-          sections={sections}
-          moveSection={moveSection}
-          removeSection={removeSection}
-          contextMenu={contextMenu}
-          setContextMenu={setContextMenu}
-          handleRightClick={(e, id) => {
-            e.preventDefault();
-            setContextMenu({ x: e.pageX, y: e.pageY, sectionId: id });
-          }}
-          handleDrop={(e) => {
+      <div className="flex-1 h-screen overflow-y-auto p-6">
+        <div
+          className="bg-white p-8 rounded-lg shadow-lg mx-auto"
+          style={{ maxWidth: "800px" }}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
             e.preventDefault();
             const sectionId = e.dataTransfer.getData("sectionId");
             if (!sectionId) return;
             const previewRect = resumeRef.current.getBoundingClientRect();
             const dropY = e.clientY - previewRect.top;
             const sectionNodes = Array.from(resumeRef.current.children);
-            let insertIndex = sections.length; // Default: append to end
+            let insertIndex = sections.length;
             for (let i = 0; i < sectionNodes.length; i++) {
               const node = sectionNodes[i];
               const nodeRect = node.getBoundingClientRect();
@@ -139,24 +138,30 @@ const ResumeBuilder = () => {
             }
             addSection(sectionId, insertIndex);
           }}
-          currentTemplate={currentTemplate}
-          customizations={customizations}
-        />
+        >
+          <PreviewPanel
+            resumeRef={resumeRef}
+            sections={sections}
+            moveSection={moveSection}
+            removeSection={removeSection}
+            contextMenu={contextMenu}
+            setContextMenu={setContextMenu}
+            handleRightClick={(e, id) => {
+              e.preventDefault();
+              setContextMenu({ x: e.pageX, y: e.pageY, sectionId: id });
+            }}
+            currentTemplate={currentTemplate}
+            customizations={customizations}
+          />
+        </div>
       </div>
 
-      {/* Right Panel: Templates and Customization */}
-      <div className="w-72 sticky top-0 h-screen flex flex-col gap-4 overflow-y-auto">
-        {/* Template Panel */}
-        <TemplatePanel
-          applyTemplate={applyTemplate}
-          customizations={customizations}
-        />
-        {/* Customization Panel */}
-        <CustomizationPanel
-          customizations={customizations}
-          updateCustomizations={updateCustomizations}
-        />
-      </div>
+      {/* Right Panel */}
+      <RightPanel
+        applyTemplate={applyTemplate}
+        customizations={{ ...customizations, template: currentTemplate }}
+        updateCustomizations={updateCustomizations}
+      />
     </div>
   );
 };

@@ -1,4 +1,3 @@
-import React from "react";
 import PropTypes from "prop-types";
 
 const CustomizationPanel = ({ customizations, updateCustomizations }) => {
@@ -11,31 +10,28 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
   };
 
   return (
-    <div className="mt-6">
-      {/* Header */}
-      <h2 className="text-lg font-semibold mb-4">Customize Resume</h2>
-
-      {/* Customization Options */}
-      <div className="space-y-4">
+    <div>
+      <h2 className="text-xl font-semibold mb-4">Customize Resume</h2>
+      <div className="space-y-5">
         {/* Font */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Font:
           </label>
           <select
             value={customizations.font}
             onChange={(e) => updateCustomizations("font", e.target.value)}
-            className="w-full p-2 rounded border border-gray-300 mt-1"
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option>Roboto</option>
-            <option>Open Sans</option>
-            <option>Lato</option>
+            <option value="Roboto">Roboto</option>
+            <option value="Open Sans">Open Sans</option>
+            <option value="Lato">Lato</option>
           </select>
         </div>
 
         {/* Font Size */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Font Size:
           </label>
           <input
@@ -44,13 +40,13 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
             onChange={(e) =>
               updateCustomizations("fontSize", `${e.target.value}px`)
             }
-            className="w-full p-2 rounded border border-gray-300 mt-1"
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         {/* Primary Color */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Primary Color:
           </label>
           <input
@@ -59,13 +55,13 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
             onChange={(e) =>
               updateCustomizations("primaryColor", e.target.value)
             }
-            className="w-full p-2 rounded mt-1"
+            className="w-full p-1 rounded-md"
           />
         </div>
 
         {/* Secondary Color */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Secondary Color:
           </label>
           <input
@@ -74,14 +70,14 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
             onChange={(e) =>
               updateCustomizations("secondaryColor", e.target.value)
             }
-            className="w-full p-2 rounded mt-1"
+            className="w-full p-1 rounded-md"
           />
         </div>
 
         {/* Reset Button */}
         <button
           onClick={handleReset}
-          className="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 transition-colors"
+          className="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition-colors"
         >
           Reset to Defaults
         </button>
@@ -90,7 +86,6 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
   );
 };
 
-// Prop Types Validation
 CustomizationPanel.propTypes = {
   customizations: PropTypes.object.isRequired,
   updateCustomizations: PropTypes.func.isRequired,
