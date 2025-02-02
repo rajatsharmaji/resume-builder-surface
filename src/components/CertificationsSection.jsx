@@ -1,20 +1,37 @@
-// src/components/CertificationsSection.jsx
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import { FiAward } from "react-icons/fi"; // Import an icon for visual appeal
 import { ResumeContext } from "../context/resume-context";
 
-const CertificationsSection = ({ sectionId }) => {
+const CertificationsSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);
+  // Initialize local state with the certifications data from context
+  const initialValue = sectionsData[sectionId]?.content.certifications || "";
+  const [certifications, setCertifications] = useState(initialValue);
 
-  // Retrieve certifications content for this section
-  const certifications = sectionsData[sectionId]?.content.certifications || "";
-
-  // Update the certifications content in the global state
-  const handleInputChange = (value) => {
-    updateSectionContent(sectionId, { certifications: value });
+  // Update local state on each keystroke
+  const handleChange = (e) => {
+    setCertifications(e.target.value);
   };
 
+  // Update the global context when the user leaves the input field
+  const handleBlur = () => {
+    updateSectionContent(sectionId, { certifications });
+  };
+
+  // If in final mode, render a clean preview without editable inputs
+  if (finalMode) {
+    return (
+      <div className="mb-4">
+        <h3 className="text-xl font-semibold text-gray-800 mb-2">
+          Certifications
+        </h3>
+        <p className="text-gray-700">{certifications}</p>
+      </div>
+    );
+  }
+
+  // Render the editable version of the Certifications section
   return (
     <div className="border border-gray-200 rounded-lg p-6 bg-white shadow-sm">
       {/* Header with Icon */}
@@ -33,7 +50,8 @@ const CertificationsSection = ({ sectionId }) => {
           placeholder="Enter certifications (comma-separated)"
           className="block w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
           value={certifications}
-          onChange={(e) => handleInputChange(e.target.value)}
+          onChange={handleChange}
+          onBlur={handleBlur}
         />
       </div>
 
@@ -50,6 +68,7 @@ const CertificationsSection = ({ sectionId }) => {
 
 CertificationsSection.propTypes = {
   sectionId: PropTypes.number.isRequired,
+  finalMode: PropTypes.bool,
 };
 
 export default CertificationsSection;
