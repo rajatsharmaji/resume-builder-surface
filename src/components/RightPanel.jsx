@@ -8,14 +8,16 @@ const RightPanel = ({
   updateCustomizations,
 }) => {
   return (
-    <div className="w-80 h-screen sticky top-0 overflow-y-auto p-6 bg-white border-l border-gray-200 shadow-md">
-      <div className="mb-6">
+    <div className="w-80 h-screen sticky top-0 p-6 bg-white border-l border-gray-200 shadow-md flex flex-col space-y-6">
+      {/* Template Panel */}
+      <div className="max-h-[45vh] overflow-y-auto">
         <TemplatePanel
           applyTemplate={applyTemplate}
           customizations={customizations}
         />
       </div>
-      <div>
+      {/* Customization Panel */}
+      <div className="max-h-[45vh] overflow-y-auto">
         <CustomizationPanel
           customizations={customizations}
           updateCustomizations={updateCustomizations}

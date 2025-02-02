@@ -102,7 +102,7 @@ const ResumeBuilder = () => {
           />
         </div>
         {/* Layers Panel */}
-        <div>
+        <div className="max-h-[45vh] overflow-y-auto">
           <h2 className="text-xl font-semibold mb-4">Layers</h2>
           <LayersPanel
             sections={sections}
@@ -112,7 +112,7 @@ const ResumeBuilder = () => {
         </div>
       </div>
 
-      {/* Middle Panel: Preview */}
+      {/* Middle Panel: Resume Preview */}
       <div className="flex-1 h-screen overflow-y-auto p-6">
         <div
           className="bg-white p-8 rounded-lg shadow-lg mx-auto"
