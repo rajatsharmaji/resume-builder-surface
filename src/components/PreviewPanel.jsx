@@ -13,7 +13,23 @@ const PreviewPanel = ({
   setContextMenu,
   handleRightClick,
   handleDrop,
+  currentTemplate,
 }) => {
+  const getTemplateStyles = () => {
+    switch (currentTemplate) {
+      case "classic":
+        return "bg-white text-black";
+      case "modern":
+        return "bg-gray-900 text-white";
+      case "minimalist":
+        return "bg-gray-50 text-gray-800";
+      case "creative":
+        return "bg-gradient-to-br from-purple-500 to-pink-500 text-white";
+      default:
+        return "bg-white text-black";
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col gap-4">
       {/* Fixed Header */}
@@ -25,7 +41,7 @@ const PreviewPanel = ({
       </div>
       {/* Scrollable Preview Content */}
       <div
-        className="bg-white rounded-xl shadow-sm border border-gray-100 relative flex-1 overflow-y-auto"
+        className={`rounded-xl shadow-sm border border-gray-100 relative flex-1 overflow-y-auto ${getTemplateStyles()}`}
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
       >
