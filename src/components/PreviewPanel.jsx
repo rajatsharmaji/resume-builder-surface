@@ -52,7 +52,7 @@ const PreviewPanel = ({
 
   const EmptyColumnMessage = () => (
     <div className="text-center p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 text-gray-400">
-      Drag sections here to add content
+      <p className="text-sm font-medium">Drag sections here to add content</p>
     </div>
   );
 
@@ -64,7 +64,6 @@ const PreviewPanel = ({
     const mid = Math.ceil(otherSections.length / 2);
     const leftSections = otherSections.slice(0, mid);
     const rightSections = otherSections.slice(mid);
-
     content = (
       <>
         {headerSection && <SectionWrapper section={headerSection} index={0} />}
@@ -114,31 +113,37 @@ const PreviewPanel = ({
   return (
     <div className="flex-1 flex flex-col gap-4 h-full">
       {/* Top header bar */}
-      {!finalMode && (
-        <div className="flex items-center justify-between px-4 py-3 bg-white border-b">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <FiLayout className="text-blue-600" />
-            <span className="text-gray-800">Resume Preview</span>
-          </h2>
-          <DownloadButton contentRef={resumeRef} disableDownload={!finalMode} />
-        </div>
-      )}
-
-      {finalMode && (
-        <div className="px-4 py-3 bg-white border-b">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Final Resume Preview
-          </h2>
-          <div className="mt-2">
-            <DownloadButton contentRef={resumeRef} disableDownload={false} />
-          </div>
-        </div>
-      )}
+      <div className="flex items-center justify-between px-4 py-3 bg-white border-b">
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          <FiLayout className="text-blue-600" />
+          <span className="text-gray-800">
+            {finalMode ? "Final Resume Preview" : "Resume Preview"}
+          </span>
+        </h2>
+        {/* Hide DownloadButton in Edit Mode */}
+        {finalMode && (
+          <DownloadButton contentRef={resumeRef} disableDownload={false} />
+        )}
+      </div>
 
       {/* Preview area */}
       <div
         className="flex-1 overflow-auto bg-gray-50 p-6"
-        onDragOver={(e) => e.preventDefault()}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.currentTarget.classList.add(
+            "border-dashed",
+            "border-2",
+            "border-gray-400"
+          );
+        }}
+        onDragLeave={(e) => {
+          e.currentTarget.classList.remove(
+            "border-dashed",
+            "border-2",
+            "border-gray-400"
+          );
+        }}
         onDrop={handleDrop}
         style={{
           fontFamily: customizations.font,
