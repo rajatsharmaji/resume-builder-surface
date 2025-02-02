@@ -4,7 +4,7 @@ import { useState } from "react";
 const CustomizationPanel = ({ customizations, updateCustomizations }) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  // Reset to default customization values
+  // Reset to default customization values (using string values for consistency)
   const handleReset = () => {
     updateCustomizations("font", "Roboto");
     updateCustomizations("fontSize", "16px");
@@ -15,10 +15,9 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
 
   return (
     <div className="p-6 bg-white shadow-lg rounded-lg max-w-md mx-auto">
-      {/* Title */}
-      <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center justify-between">
-        <span>Customize Resume</span>
-        {/* Reset Icon */}
+      {/* Title and Reset Button */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">Customize Resume</h2>
         <button
           onClick={() => setIsConfirmOpen(true)}
           className="text-red-500 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
@@ -39,12 +38,12 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
             />
           </svg>
         </button>
-      </h2>
+      </div>
 
       {/* Confirmation Modal */}
       {isConfirmOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm text-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full text-center">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
               Reset to Defaults?
             </h3>
@@ -80,7 +79,7 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
           <select
             value={customizations.font}
             onChange={(e) => updateCustomizations("font", e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
           >
             <option value="Roboto">Roboto</option>
             <option value="Open Sans">Open Sans</option>
@@ -91,15 +90,21 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
         {/* Font Size */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Font Size (px):
+            Font Size:{" "}
+            <span className="font-medium">
+              {parseInt(customizations.fontSize, 10)}px
+            </span>
           </label>
           <input
-            type="number"
+            type="range"
+            min="12"
+            max="32"
+            step="1"
             value={parseInt(customizations.fontSize, 10)}
             onChange={(e) =>
               updateCustomizations("fontSize", `${e.target.value}px`)
             }
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
         </div>
 
@@ -114,7 +119,7 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
             onChange={(e) =>
               updateCustomizations("primaryColor", e.target.value)
             }
-            className="w-full h-10 p-1 rounded-lg cursor-pointer"
+            className="w-full h-10 rounded-lg cursor-pointer border border-gray-300"
           />
         </div>
 
@@ -129,7 +134,7 @@ const CustomizationPanel = ({ customizations, updateCustomizations }) => {
             onChange={(e) =>
               updateCustomizations("secondaryColor", e.target.value)
             }
-            className="w-full h-10 p-1 rounded-lg cursor-pointer"
+            className="w-full h-10 rounded-lg cursor-pointer border border-gray-300"
           />
         </div>
       </div>

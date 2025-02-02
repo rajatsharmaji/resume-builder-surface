@@ -1,27 +1,29 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
 import { FiEye } from "react-icons/fi";
+import { FaListAlt, FaColumns, FaTh } from "react-icons/fa";
 
 const TemplatePanel = ({ applyTemplate, customizations }) => {
   const [previewTemplate, setPreviewTemplate] = useState(null);
 
+  // Define templates with icons replacing the thumbnail images.
   const templates = [
     {
       id: "single-column",
       name: "Single Column",
-      thumbnail: "https://via.placeholder.com/300x150?text=Single+Column",
+      icon: <FaListAlt size={48} className="mx-auto text-gray-500" />,
       description: "A simple, linear layout.",
     },
     {
       id: "two-column",
       name: "Two Column",
-      thumbnail: "https://via.placeholder.com/300x150?text=Two+Column",
+      icon: <FaColumns size={48} className="mx-auto text-gray-500" />,
       description: "A split layout with a sidebar.",
     },
     {
       id: "grid",
       name: "Grid Layout",
-      thumbnail: "https://via.placeholder.com/300x150?text=Grid+Layout",
+      icon: <FaTh size={48} className="mx-auto text-gray-500" />,
       description: "A flexible grid-based design.",
     },
   ];
@@ -31,35 +33,35 @@ const TemplatePanel = ({ applyTemplate, customizations }) => {
       <h2 className="text-xl font-bold text-gray-800 mb-4">Resume Templates</h2>
 
       {/* Template Cards */}
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
         {templates.map((template) => (
           <div
             key={template.id}
             onClick={() => applyTemplate(template.id)}
-            className={`p-4 rounded-lg cursor-pointer transition-all duration-300 border ${
+            className={`p-4 rounded-lg cursor-pointer transition-all duration-300 border shadow-sm ${
               customizations.template === template.id
                 ? "border-blue-500 bg-blue-50"
                 : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
             }`}
           >
-            <img
-              src={template.thumbnail}
-              alt={template.name}
-              className="w-full h-32 object-cover rounded-md mb-3"
-            />
-            <h3 className="font-medium text-lg text-gray-800">
+            <div className="mb-3">{template.icon}</div>
+            <h3 className="font-medium text-lg text-gray-800 text-center">
               {template.name}
             </h3>
-            <p className="text-sm text-gray-600 mb-2">{template.description}</p>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setPreviewTemplate(template);
-              }}
-              className="flex items-center text-blue-500 hover:text-blue-600 transition-colors text-sm font-medium"
-            >
-              <FiEye className="mr-1" /> Preview
-            </button>
+            <p className="text-sm text-gray-600 text-center mb-2">
+              {template.description}
+            </p>
+            <div className="flex justify-center">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPreviewTemplate(template);
+                }}
+                className="flex items-center text-blue-500 hover:text-blue-600 transition-colors text-sm font-medium"
+              >
+                <FiEye className="mr-1" /> Preview
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -74,8 +76,13 @@ const TemplatePanel = ({ applyTemplate, customizations }) => {
             >
               &times;
             </button>
-            <h3 className="text-2xl font-bold mb-2">{previewTemplate.name}</h3>
-            <p className="text-gray-600">{previewTemplate.description}</p>
+            <div className="text-center mb-4">{previewTemplate.icon}</div>
+            <h3 className="text-2xl font-bold mb-2 text-center">
+              {previewTemplate.name}
+            </h3>
+            <p className="text-gray-600 text-center">
+              {previewTemplate.description}
+            </p>
           </div>
         </div>
       )}
