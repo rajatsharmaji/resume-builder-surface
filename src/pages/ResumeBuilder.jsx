@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import useResume from "../hooks/useResume";
 import ElementsPanel from "../components/left-panel/ElementsPanel";
 import LayersPanel from "../components/left-panel/LayersPanel";
@@ -17,10 +17,9 @@ import {
 const ResumeBuilder = () => {
   const { sections, addSection, moveSection, removeSection } = useResume();
   const [contextMenu, setContextMenu] = useState(null);
-  // Use "default" as the default template (maps to your single-column layout)
   const [currentTemplate, setCurrentTemplate] = useState("default");
   const [customizations, setCustomizations] = useState({
-    font: "Roboto",
+    font: "Roboto, sans-serif",
     fontSize: 16,
     primaryColor: "#007BFF",
     secondaryColor: "#F8F9FA",
@@ -28,7 +27,7 @@ const ResumeBuilder = () => {
     textColor: "#000000",
     backgroundColor: "#ffffff",
   });
-  const [isFinalPreview, setIsFinalPreview] = useState(false);
+  const [finalMode, setFinalMode] = useState(false);
   const resumeRef = useRef(null);
 
   // Define section types for the Elements Panel
@@ -36,62 +35,62 @@ const ResumeBuilder = () => {
     {
       id: "header",
       label: "Header",
-      icon: <FiLayout className="w-5 h-5" />,
+      icon: <FiUser />,
       color: "bg-red-100",
       tooltip: "Add a header section to your resume.",
     },
     {
       id: "about",
       label: "About",
-      icon: <FiUser className="w-5 h-5" />,
+      icon: <FiFileText />,
       color: "bg-blue-100",
       tooltip: "Introduce yourself with an about section.",
     },
     {
       id: "experience",
       label: "Experience",
-      icon: <FiBriefcase className="w-5 h-5" />,
+      icon: <FiBriefcase />,
       color: "bg-green-100",
       tooltip: "Highlight your professional experience.",
     },
     {
       id: "education",
       label: "Education",
-      icon: <FiBook className="w-5 h-5" />,
+      icon: <FiBook />,
       color: "bg-yellow-100",
       tooltip: "Showcase your educational background.",
     },
     {
       id: "skills",
       label: "Skills",
-      icon: <FiCode className="w-5 h-5" />,
+      icon: <FiCode />,
       color: "bg-purple-100",
       tooltip: "List your key skills and competencies.",
     },
     {
       id: "projects",
       label: "Projects",
-      icon: <FiFileText className="w-5 h-5" />,
+      icon: <FiAward />,
       color: "bg-indigo-100",
       tooltip: "Describe your notable projects.",
     },
     {
       id: "certifications",
       label: "Certifications",
-      icon: <FiAward className="w-5 h-5" />,
+      icon: <FiAward />,
       color: "bg-pink-100",
       tooltip: "Display your certifications and achievements.",
     },
     {
       id: "footer",
       label: "Footer",
-      icon: <FiLayout className="w-5 h-5" />,
+      icon: <FiLayout />,
       color: "bg-red-100",
       tooltip: "Add a footer section to your resume.",
     },
   ];
 
-  // Handle template selection – this function can be invoked from your RightPanel
+  // Handle template selection
   const applyTemplate = (templateId) => {
     setCurrentTemplate(templateId);
     console.log(`Applied template: ${templateId}`);
@@ -105,7 +104,7 @@ const ResumeBuilder = () => {
     }));
   };
 
-  // Wrap moveSection to prevent moving locked sections (header/footer)
+  // Prevent moving locked sections
   const handleMoveSection = (draggedId, targetIndex) => {
     const draggedSection = sections.find((s) => s.id === draggedId);
     if (draggedSection) {
@@ -121,10 +120,10 @@ const ResumeBuilder = () => {
     moveSection(draggedId, targetIndex);
   };
 
-  // Handle drop when adding new sections.
+  // Handle drop when adding new sections
   const handleDrop = (e) => {
     e.preventDefault();
-    e.stopPropagation(); // Prevent duplicate drop events
+    e.stopPropagation();
     const sectionId = e.dataTransfer.getData("sectionId");
     if (!sectionId) return;
 
@@ -138,7 +137,6 @@ const ResumeBuilder = () => {
       const dropY = e.clientY - previewRect.top;
       const sectionNodes = Array.from(resumeRef.current.children);
       insertIndex = sections.length;
-
       for (let i = 0; i < sectionNodes.length; i++) {
         const node = sectionNodes[i];
         const nodeRect = node.getBoundingClientRect();
@@ -153,98 +151,59 @@ const ResumeBuilder = () => {
     addSection(sectionId, insertIndex);
   };
 
+  // Handle right-click to show context menu (only in edit mode)
+  const handleRightClick = (e, id) => {
+    e.preventDefault();
+    if (!finalMode) {
+      setContextMenu({ x: e.pageX, y: e.pageY, sectionId: id });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 font-sans flex">
+    <div className="flex h-screen">
       {/* Left Panel */}
-      <div className="w-72 h-screen sticky top-0 overflow-y-auto p-4 bg-white border-r border-gray-200 shadow-md transition-all duration-300">
-        {/* Elements Panel */}
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">Elements</h2>
-          <ElementsPanel
-            sectionTypes={sectionTypes}
-            addSection={addSection}
-            handleDragStart={(e, id) => e.dataTransfer.setData("sectionId", id)}
-          />
-        </div>
-        {/* Layers Panel */}
-        <div className="max-h-[45vh] overflow-y-auto">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">Layers</h2>
-          <LayersPanel
-            sections={sections}
-            moveSection={handleMoveSection}
-            removeSection={removeSection}
-          />
-        </div>
+      <div className="w-1/5 border-r border-gray-200 p-4">
+        <ElementsPanel
+          sectionTypes={sectionTypes}
+          onDragStart={(id, e) => e.dataTransfer.setData("sectionId", id)}
+        />
+        <LayersPanel
+          sections={sections}
+          moveSection={handleMoveSection}
+          removeSection={removeSection}
+        />
       </div>
 
       {/* Middle Panel: Resume Preview */}
-      <div className="flex-1 h-screen overflow-y-auto p-6 relative">
-        {/* Toggle button for switching preview mode */}
-        <div className="flex justify-between items-center mb-4">
+      <div className="flex-1 p-4 relative" ref={resumeRef}>
+        <div className="flex justify-end mb-4">
           <button
-            onClick={() => setIsFinalPreview((prev) => !prev)}
+            onClick={() => setFinalMode((prev) => !prev)}
             className="px-4 py-2 rounded-lg border border-gray-300 bg-white shadow-sm text-gray-800 hover:bg-gray-100 transition-colors"
-            aria-label="Toggle Final Preview Mode"
           >
-            {isFinalPreview ? "Edit Mode" : "Final Preview"}
+            {finalMode ? "Switch to Edit Mode" : "Final Preview"}
           </button>
         </div>
-
-        <div
-          className={`bg-white p-8 rounded-lg shadow-lg mx-auto transition-shadow duration-300 ${
-            isFinalPreview ? "shadow-2xl" : "shadow-lg"
-          }`}
-          style={{ maxWidth: "800px" }}
-          onDragOver={(e) => {
-            e.preventDefault();
-            e.currentTarget.classList.add(
-              "border-dashed",
-              "border-2",
-              "border-gray-400"
-            );
-          }}
-          onDragLeave={(e) => {
-            e.currentTarget.classList.remove(
-              "border-dashed",
-              "border-2",
-              "border-gray-400"
-            );
-          }}
-          onDrop={(e) => {
-            e.currentTarget.classList.remove(
-              "border-dashed",
-              "border-2",
-              "border-gray-400"
-            );
-            handleDrop(e);
-          }}
-        >
-          <PreviewPanel
-            resumeRef={resumeRef}
-            sections={sections}
-            moveSection={handleMoveSection}
-            removeSection={removeSection}
-            contextMenu={contextMenu}
-            setContextMenu={setContextMenu}
-            handleRightClick={(e, id) => {
-              e.preventDefault();
-              if (!isFinalPreview) {
-                setContextMenu({ x: e.pageX, y: e.pageY, sectionId: id });
-              }
-            }}
-            handleDrop={handleDrop}
-            currentTemplate={currentTemplate}
-            customizations={customizations}
-            finalMode={isFinalPreview}
-          />
-        </div>
+        <PreviewPanel
+          resumeRef={resumeRef}
+          sections={sections}
+          moveSection={handleMoveSection}
+          removeSection={removeSection}
+          contextMenu={contextMenu}
+          setContextMenu={setContextMenu}
+          handleRightClick={handleRightClick}
+          handleDrop={handleDrop}
+          currentTemplate={currentTemplate}
+          customizations={customizations}
+          finalMode={finalMode}
+        />
       </div>
 
       {/* Right Panel */}
       <RightPanel
-        applyTemplate={applyTemplate}
-        customizations={{ ...customizations, template: currentTemplate }}
+        customizations={customizations}
         updateCustomizations={updateCustomizations}
+        applyTemplate={applyTemplate}
       />
     </div>
   );
