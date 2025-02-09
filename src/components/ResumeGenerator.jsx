@@ -10,9 +10,7 @@ const ResumeGenerator = ({ className, disableDownload }) => {
   const [error, setError] = useState(null);
   const [pdfDataUrl, setPdfDataUrl] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [numPages, setNumPages] = useState(0);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const generateResume = async () => {
     if (disableDownload) return;
     setIsLoading(true);
@@ -72,6 +70,7 @@ const ResumeGenerator = ({ className, disableDownload }) => {
 
   const handleDownload = () => {
     if (!pdfDataUrl) return;
+
     const link = document.createElement("a");
     link.href = pdfDataUrl;
     link.download = "resume.pdf";
@@ -79,9 +78,8 @@ const ResumeGenerator = ({ className, disableDownload }) => {
   };
 
   return (
-    <div className={`p-6 bg-gray-100 rounded-lg shadow-md ${className}`}>
-      <div className="mb-4">
-        <h3 className="text-2xl font-bold mb-2">Final Resume Preview</h3>
+    <div className={`p-6 bg-white rounded-lg shadow-md ${className}`}>
+      <div className="mb-6">
         {isLoading && (
           <div className="flex items-center text-blue-600">
             <FiLoader className="animate-spin mr-2" />
@@ -93,23 +91,21 @@ const ResumeGenerator = ({ className, disableDownload }) => {
 
       {pdfDataUrl && (
         <>
-          <PdfPreviewer
-            pdfDataUrl={pdfDataUrl}
-            numPages={numPages}
-            setNumPages={setNumPages}
-          />
+          <div className="h-[calc(100vh-200px)]">
+            <PdfPreviewer pdfDataUrl={pdfDataUrl} />
+          </div>
 
-          <div className="flex flex-wrap gap-4">
+          <div className="mt-6 flex gap-4">
             <button
               onClick={handleDownload}
-              className="flex items-center px-5 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition"
+              className="flex items-center px-5 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-300"
             >
               <FiDownload className="mr-2" />
               Download PDF
             </button>
             <button
               onClick={() => setIsEditMode(true)}
-              className="flex items-center px-5 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
+              className="flex items-center px-5 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition duration-300"
             >
               <FiEdit className="mr-2" />
               Edit PDF

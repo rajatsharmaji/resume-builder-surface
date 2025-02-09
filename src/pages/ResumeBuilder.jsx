@@ -181,7 +181,7 @@ const ResumeBuilder = () => {
             onClick={() => setFinalMode((prev) => !prev)}
             className="px-4 py-2 rounded-lg border border-gray-300 bg-white shadow-sm text-gray-800 hover:bg-gray-100 transition-colors"
           >
-            {finalMode ? "Switch to Edit Mode" : "Final Preview"}
+            {finalMode ? "Switch to Edit Mode" : "Generate"}
           </button>
         </div>
         <PreviewPanel
