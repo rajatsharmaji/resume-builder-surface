@@ -5,14 +5,11 @@ import {
   FiX,
   FiCheck,
   FiLayout,
-  FiGrid,
-  FiSidebar,
-  FiBox,
-  FiColumns,
-  FiType,
-  FiImage,
-  FiList,
-  FiSliders,
+  FiBook,
+  FiCode,
+  FiMonitor,
+  FiCloud,
+  FiStar,
 } from "react-icons/fi";
 
 const TemplatePreviewModal = ({ template, onClose }) => {
@@ -109,65 +106,55 @@ const TemplatePanel = ({ applyTemplate, customizations }) => {
 
   const templates = [
     {
-      id: "portfolio",
-      name: "Portfolio",
-      sections: 5,
-      features: ["Hero", "Projects", "Skills", "Testimonials", "Contact"],
-      description: "Modern portfolio showcase with project highlights",
-      color: "bg-gradient-to-br from-purple-100 to-blue-100", // changed to light professional colors
-      icon: FiLayout,
-      preview: FiGrid,
-    },
-    {
-      id: "blog",
-      name: "Blog Layout",
-      sections: 4,
-      features: [
-        "Featured Post",
-        "Categories",
-        "Recent Articles",
-        "Newsletter",
-      ],
-      description: "Clean content-focused blog layout",
-      color: "bg-gradient-to-br from-green-100 to-cyan-100", // changed to light professional colors
-      icon: FiSidebar,
-      preview: FiList,
-    },
-    {
-      id: "ecommerce",
-      name: "E-Commerce",
-      sections: 6,
-      features: [
-        "Product Grid",
-        "Filters",
-        "Featured Items",
-        "Cart",
-        "Reviews",
-      ],
-      description: "Online store template with product showcase",
-      color: "bg-gradient-to-br from-orange-100 to-red-100", // changed to light professional colors
-      icon: FiBox,
-      preview: FiColumns,
-    },
-    {
-      id: "landing",
-      name: "Landing Page",
-      sections: 4,
-      features: ["Hero", "Features", "Pricing", "CTA"],
-      description: "High-conversion marketing landing page",
-      color: "bg-gradient-to-br from-pink-100 to-rose-100", // changed to light professional colors
-      icon: FiType,
-      preview: FiSliders,
-    },
-    {
-      id: "gallery",
-      name: "Photo Gallery",
+      id: "deedy-cv",
+      name: "Deedy CV",
       sections: 3,
-      features: ["Fullscreen Grid", "Lightbox", "Categories"],
-      description: "Visual-focused image gallery layout",
-      color: "bg-gradient-to-br from-yellow-100 to-amber-100", // changed to light professional colors
-      icon: FiImage,
-      preview: FiGrid,
+      features: [
+        "One-Page Layout",
+        "Print Friendly",
+        "Minimalist Design",
+        "Customizable via LaTeX",
+      ],
+      description:
+        "Inspired by the famous Deedy CV, this template is perfect for software developers seeking a clean, modern, and highly readable résumé.",
+      color: "bg-gradient-to-br from-gray-100 to-blue-100",
+      icon: FiBook,
+      preview: FiCode,
+      badges: ["Responsive", "Open Source", "ATS Friendly"],
+    },
+    {
+      id: "modern-cv",
+      name: "Modern Developer CV",
+      sections: 4,
+      features: [
+        "Clean Layout",
+        "Interactive Timeline",
+        "Downloadable PDF",
+        "Editable Sections",
+      ],
+      description:
+        "A sleek, modern résumé template that emphasizes clarity and ease-of-use, ideal for developers who want a professional look with a contemporary twist.",
+      color: "bg-gradient-to-br from-green-50 to-teal-50",
+      icon: FiMonitor,
+      preview: FiCode,
+      badges: ["Customizable", "ATS Optimized", "Responsive"],
+    },
+    {
+      id: "creative-cv",
+      name: "Creative Developer CV",
+      sections: 5,
+      features: [
+        "Visual Timeline",
+        "Project Highlights",
+        "Skill Graphs",
+        "Integrated Portfolio",
+      ],
+      description:
+        "A creative résumé design that seamlessly integrates project showcases with a professional CV layout, perfect for developers who want to highlight both technical skills and creative flair.",
+      color: "bg-gradient-to-br from-pink-50 to-red-50",
+      icon: FiStar,
+      preview: FiCloud,
+      badges: ["Modern", "Interactive", "Unique Design"],
     },
   ];
 
