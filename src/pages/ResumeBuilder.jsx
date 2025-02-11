@@ -83,7 +83,7 @@ const ResumeBuilder = () => {
       }
     }
 
-    // Adjust for header/footer
+    // Adjust for header/footer positioning
     const headerIndex = sections.findIndex((s) => s.type === "header");
     const footerIndex = sections.findIndex((s) => s.type === "footer");
 
@@ -92,11 +92,19 @@ const ResumeBuilder = () => {
       insertIndex = footerIndex - 1;
 
     if (existingSectionId) {
+      // Moving an existing section
       const draggedSection = sections.find((s) => s.id === existingSectionId);
       if (!draggedSection) return;
       if (["header", "footer"].includes(draggedSection.type)) return;
       moveSection(existingSectionId, insertIndex);
     } else if (newSectionId) {
+      // Prevent duplicate unique sections (e.g. header/footer)
+      if (
+        (newSectionId === "header" || newSectionId === "footer") &&
+        sections.some((s) => s.type === newSectionId)
+      ) {
+        return;
+      }
       addSection(newSectionId, insertIndex);
     }
   };
@@ -108,6 +116,7 @@ const ResumeBuilder = () => {
 
   return (
     <div className="flex h-screen">
+      {/* Left Panel */}
       <div className="w-1/5 border-r border-gray-200 p-4">
         <ElementsPanel
           sectionTypes={sectionTypes}
@@ -121,7 +130,8 @@ const ResumeBuilder = () => {
         />
       </div>
 
-      <div className="flex-1 p-4 relative" ref={resumeRef}>
+      {/* Preview Panel Container */}
+      <div className="flex-1 p-4 relative overflow-hidden" ref={resumeRef}>
         <div className="flex justify-end mb-4">
           <button
             onClick={() => setFinalMode((prev) => !prev)}
@@ -144,11 +154,14 @@ const ResumeBuilder = () => {
         />
       </div>
 
-      <RightPanel
-        customizations={customizations}
-        updateCustomizations={setCustomizations}
-        applyTemplate={setCurrentTemplate}
-      />
+      {/* Right Panel */}
+      <div className="w-1/5 border-l border-gray-200 p-4">
+        <RightPanel
+          customizations={customizations}
+          updateCustomizations={setCustomizations}
+          applyTemplate={setCurrentTemplate}
+        />
+      </div>
     </div>
   );
 };

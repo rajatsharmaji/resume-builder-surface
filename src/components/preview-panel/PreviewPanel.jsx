@@ -4,7 +4,6 @@ import ContextMenu from "./ContextMenu";
 import { templateComponents } from "../templates";
 
 const PreviewPanel = ({
-  resumeRef,
   sections,
   removeSection,
   contextMenu,
@@ -18,7 +17,7 @@ const PreviewPanel = ({
     templateComponents[currentTemplate] || templateComponents["single-column"];
 
   return (
-    <div className="bg-gray-100 p-6 rounded-lg shadow-md h-full">
+    <div className="bg-gray-100 p-6 rounded-lg shadow-md h-full w-full overflow-hidden">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-gray-800">
           {finalMode ? "Final Resume Preview" : "Resume Preview"}
@@ -34,7 +33,7 @@ const PreviewPanel = ({
           color: customizations.textColor,
           backgroundColor: customizations.backgroundColor,
         }}
-        className="p-6 rounded-lg shadow-inner h-[calc(100%-100px)]"
+        className="p-6 rounded-lg shadow-inner h-[calc(100%-100px)] overflow-y-auto overflow-x-hidden"
       >
         {contextMenu && !finalMode && (
           <ContextMenu
