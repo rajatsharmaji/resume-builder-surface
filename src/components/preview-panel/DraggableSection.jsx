@@ -9,7 +9,6 @@ import AboutSection from "../sections/AboutSection";
 import ProjectsSection from "../sections/ProjectsSection";
 import CertificationsSection from "../sections/CertificationsSection";
 
-// Map section "type" to the actual component
 const sectionComponents = {
   header: HeaderSection,
   footer: FooterSection,
@@ -21,17 +20,10 @@ const sectionComponents = {
   certifications: CertificationsSection,
 };
 
-const DraggableSection = ({
-  section,
-  index,
-  moveSection,
-  removeSection,
-  finalMode = false, // default false
-}) => {
+const DraggableSection = ({ section, removeSection, finalMode = false }) => {
   const Component = sectionComponents[section.type];
   const isLocked = section.type === "header" || section.type === "footer";
 
-  // Drag & drop is allowed only if the section is not locked.
   const handleDragStart = (e) => {
     if (isLocked) {
       e.preventDefault();
@@ -42,21 +34,7 @@ const DraggableSection = ({
       );
       return;
     }
-    e.dataTransfer.setData("text/plain", section.id);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    if (isLocked) {
-      alert(
-        `${
-          section.type.charAt(0).toUpperCase() + section.type.slice(1)
-        } section is locked and cannot be repositioned.`
-      );
-      return;
-    }
-    const draggedId = e.dataTransfer.getData("text/plain");
-    moveSection(draggedId, index);
+    e.dataTransfer.setData("application/existing-section", section.id);
   };
 
   if (finalMode) {
@@ -75,8 +53,6 @@ const DraggableSection = ({
     <div
       draggable={!isLocked}
       onDragStart={handleDragStart}
-      onDrop={handleDrop}
-      onDragOver={(e) => e.preventDefault()}
       className="mb-4 border border-gray-200 rounded-lg p-4 bg-white shadow-sm 
                  relative transition-transform hover:shadow-md hover:-translate-y-1"
     >

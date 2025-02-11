@@ -4,6 +4,7 @@ import ContextMenu from "./ContextMenu";
 import { templateComponents } from "../templates";
 
 const PreviewPanel = ({
+  resumeRef,
   sections,
   removeSection,
   contextMenu,
@@ -18,31 +19,14 @@ const PreviewPanel = ({
 
   return (
     <div className="bg-gray-100 p-6 rounded-lg shadow-md h-full">
-      {/* Top header bar */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-gray-800">
           {finalMode ? "Final Resume Preview" : "Resume Preview"}
         </h2>
       </div>
 
-      {/* Preview area */}
       <div
         onDragOver={(e) => e.preventDefault()}
-        onDragEnter={(e) => {
-          e.preventDefault();
-          e.currentTarget.classList.add(
-            "border-dashed",
-            "border-2",
-            "border-gray-400"
-          );
-        }}
-        onDragLeave={(e) => {
-          e.currentTarget.classList.remove(
-            "border-dashed",
-            "border-2",
-            "border-gray-400"
-          );
-        }}
         onDrop={handleDrop}
         style={{
           fontFamily: customizations.font,
@@ -61,7 +45,6 @@ const PreviewPanel = ({
           />
         )}
 
-        {/* Render the chosen template component in edit mode */}
         {!finalMode && (
           <TemplateComponent
             sections={sections}
@@ -69,7 +52,6 @@ const PreviewPanel = ({
           />
         )}
 
-        {/* Render PDF Preview in Final Mode */}
         {finalMode && (
           <div className="h-full">
             <ResumeGenerator disableDownload={!finalMode} />
@@ -83,11 +65,11 @@ const PreviewPanel = ({
 PreviewPanel.propTypes = {
   resumeRef: PropTypes.object.isRequired,
   sections: PropTypes.array.isRequired,
-  moveSection: PropTypes.func.isRequired,
+  moveSection: PropTypes.func, // not used directly here
   removeSection: PropTypes.func.isRequired,
   contextMenu: PropTypes.object,
   setContextMenu: PropTypes.func.isRequired,
-  handleRightClick: PropTypes.func.isRequired,
+  handleRightClick: PropTypes.func, // not used directly here
   handleDrop: PropTypes.func.isRequired,
   currentTemplate: PropTypes.string.isRequired,
   customizations: PropTypes.shape({

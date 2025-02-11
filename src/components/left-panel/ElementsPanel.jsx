@@ -4,7 +4,6 @@ const ElementsPanel = ({ sectionTypes, addSection, handleDragStart }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col h-1/2">
       <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-700 px-4 pt-4">
-        {/* You can also import and use an icon here */}
         Elements
       </h2>
       <div className="grid grid-cols-2 gap-2 overflow-y-auto px-4 pb-4">
