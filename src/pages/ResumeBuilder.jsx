@@ -26,6 +26,7 @@ const ResumeBuilder = () => {
     spacing: "1rem",
     textColor: "#000000",
     backgroundColor: "#ffffff",
+    template: "", // store the selected template id here
   });
   const [finalMode, setFinalMode] = useState(false);
   const resumeRef = useRef(null);
@@ -115,9 +116,10 @@ const ResumeBuilder = () => {
   };
 
   return (
-    <div className="flex h-screen">
+    // Outer container prevents page scroll with overflow-hidden
+    <div className="flex h-screen overflow-hidden relative">
       {/* Left Panel */}
-      <div className="w-1/5 border-r border-gray-200 p-4">
+      <div className="w-1/5 border-r border-gray-200 p-4 overflow-y-auto">
         <ElementsPanel
           sectionTypes={sectionTypes}
           addSection={addSection}
@@ -154,14 +156,13 @@ const ResumeBuilder = () => {
         />
       </div>
 
-      {/* Right Panel */}
-      <div className="w-1/5 border-l border-gray-200 p-4">
-        <RightPanel
-          customizations={customizations}
-          updateCustomizations={setCustomizations}
-          applyTemplate={setCurrentTemplate}
-        />
-      </div>
+      {/* Right Panel is rendered via its own fixed component */}
+      <RightPanel
+        customizations={customizations}
+        applyTemplate={(templateId) =>
+          setCustomizations((prev) => ({ ...prev, template: templateId }))
+        }
+      />
     </div>
   );
 };
