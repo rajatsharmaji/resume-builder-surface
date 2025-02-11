@@ -114,7 +114,7 @@ const TemplatePanel = ({ applyTemplate, customizations }) => {
       sections: 5,
       features: ["Hero", "Projects", "Skills", "Testimonials", "Contact"],
       description: "Modern portfolio showcase with project highlights",
-      color: "bg-gradient-to-br from-purple-500 to-blue-500",
+      color: "bg-gradient-to-br from-purple-100 to-blue-100", // changed to light professional colors
       icon: FiLayout,
       preview: FiGrid,
     },
@@ -129,7 +129,7 @@ const TemplatePanel = ({ applyTemplate, customizations }) => {
         "Newsletter",
       ],
       description: "Clean content-focused blog layout",
-      color: "bg-gradient-to-br from-green-500 to-cyan-500",
+      color: "bg-gradient-to-br from-green-100 to-cyan-100", // changed to light professional colors
       icon: FiSidebar,
       preview: FiList,
     },
@@ -145,7 +145,7 @@ const TemplatePanel = ({ applyTemplate, customizations }) => {
         "Reviews",
       ],
       description: "Online store template with product showcase",
-      color: "bg-gradient-to-br from-orange-500 to-red-500",
+      color: "bg-gradient-to-br from-orange-100 to-red-100", // changed to light professional colors
       icon: FiBox,
       preview: FiColumns,
     },
@@ -155,7 +155,7 @@ const TemplatePanel = ({ applyTemplate, customizations }) => {
       sections: 4,
       features: ["Hero", "Features", "Pricing", "CTA"],
       description: "High-conversion marketing landing page",
-      color: "bg-gradient-to-br from-pink-500 to-rose-500",
+      color: "bg-gradient-to-br from-pink-100 to-rose-100", // changed to light professional colors
       icon: FiType,
       preview: FiSliders,
     },
@@ -165,7 +165,7 @@ const TemplatePanel = ({ applyTemplate, customizations }) => {
       sections: 3,
       features: ["Fullscreen Grid", "Lightbox", "Categories"],
       description: "Visual-focused image gallery layout",
-      color: "bg-gradient-to-br from-yellow-500 to-amber-500",
+      color: "bg-gradient-to-br from-yellow-100 to-amber-100", // changed to light professional colors
       icon: FiImage,
       preview: FiGrid,
     },
