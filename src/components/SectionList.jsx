@@ -15,13 +15,14 @@ import {
 } from "react-icons/fi";
 
 const sectionIcons = {
-  header: <FiLayout className="w-4 h-4" />,
-  about: <FiUser className="w-4 h-4" />,
+  header: <FiUser className="w-4 h-4" />,
+  about: <FiFileText className="w-4 h-4" />,
   experience: <FiBriefcase className="w-4 h-4" />,
   education: <FiBook className="w-4 h-4" />,
   skills: <FiCode className="w-4 h-4" />,
-  projects: <FiFileText className="w-4 h-4" />,
+  projects: <FiAward className="w-4 h-4" />,
   certifications: <FiAward className="w-4 h-4" />,
+  footer: <FiLayout className="w-4 h-4" />,
 };
 
 const SectionList = ({ sections, moveSection, removeSection }) => {
