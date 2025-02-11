@@ -13,6 +13,7 @@ const PreviewPanel = ({
   customizations,
   finalMode,
 }) => {
+  // Use the provided template component or default to "single-column"
   const TemplateComponent =
     templateComponents[currentTemplate] || templateComponents["single-column"];
 
@@ -48,6 +49,8 @@ const PreviewPanel = ({
           <TemplateComponent
             sections={sections}
             customizations={customizations}
+            removeSection={removeSection}
+            finalMode={finalMode}
           />
         )}
 
@@ -64,11 +67,9 @@ const PreviewPanel = ({
 PreviewPanel.propTypes = {
   resumeRef: PropTypes.object.isRequired,
   sections: PropTypes.array.isRequired,
-  moveSection: PropTypes.func, // not used directly here
   removeSection: PropTypes.func.isRequired,
   contextMenu: PropTypes.object,
   setContextMenu: PropTypes.func.isRequired,
-  handleRightClick: PropTypes.func, // not used directly here
   handleDrop: PropTypes.func.isRequired,
   currentTemplate: PropTypes.string.isRequired,
   customizations: PropTypes.shape({
