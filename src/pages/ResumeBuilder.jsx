@@ -17,7 +17,7 @@ import {
 const ResumeBuilder = () => {
   const { sections, addSection, moveSection, removeSection } = useResume();
   const [contextMenu, setContextMenu] = useState(null);
-  const [currentTemplate, setCurrentTemplate] = useState("default");
+  const [currentTemplate] = useState("default");
   const [customizations, setCustomizations] = useState({
     font: "Roboto, sans-serif",
     fontSize: 16,
@@ -62,6 +62,12 @@ const ResumeBuilder = () => {
     { id: "footer", label: "Footer", icon: <FiLayout />, color: "bg-red-100" },
   ];
 
+  // Wrapper function to ensure uniqueness when adding via the Elements Panel.
+  const handleAddSectionUnique = (sectionType) => {
+    if (sections.some((s) => s.type === sectionType)) return;
+    addSection(sectionType);
+  };
+
   const handleDrop = (e) => {
     e.preventDefault();
     const existingSectionId = e.dataTransfer.getData(
@@ -99,13 +105,8 @@ const ResumeBuilder = () => {
       if (["header", "footer"].includes(draggedSection.type)) return;
       moveSection(existingSectionId, insertIndex);
     } else if (newSectionId) {
-      // Prevent duplicate unique sections (e.g. header/footer)
-      if (
-        (newSectionId === "header" || newSectionId === "footer") &&
-        sections.some((s) => s.type === newSectionId)
-      ) {
-        return;
-      }
+      // Prevent duplicate sections for any type.
+      if (sections.some((s) => s.type === newSectionId)) return;
       addSection(newSectionId, insertIndex);
     }
   };
@@ -122,8 +123,9 @@ const ResumeBuilder = () => {
       <div className="w-1/5 border-r border-gray-200 p-4 overflow-y-auto">
         <ElementsPanel
           sectionTypes={sectionTypes}
-          addSection={addSection}
+          addSection={handleAddSectionUnique}
           handleDragStart={(e, id) => e.dataTransfer.setData("sectionId", id)}
+          sections={sections}
         />
         <LayersPanel
           sections={sections}
