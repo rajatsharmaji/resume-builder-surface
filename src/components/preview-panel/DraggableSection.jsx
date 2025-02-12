@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { FaTrashAlt, FaGripVertical } from "react-icons/fa";
+import { FaTrashAlt } from "react-icons/fa";
 import HeaderSection from "../sections/HeaderSection";
 import FooterSection from "../sections/FooterSection";
 import EducationSection from "../sections/EducationSection";
@@ -22,7 +22,7 @@ const sectionComponents = {
 
 const DraggableSection = ({ section, removeSection, finalMode = false }) => {
   const Component = sectionComponents[section.type];
-  const isLocked = section.type === "header" || section.type === "footer";
+  const isLocked = section.type === "header";
 
   const handleDragStart = (e) => {
     if (isLocked) {
@@ -57,23 +57,15 @@ const DraggableSection = ({ section, removeSection, finalMode = false }) => {
                  relative transition-transform hover:shadow-md hover:-translate-y-1"
     >
       {!isLocked && (
-        <>
-          <div
-            className="absolute top-1/2 left-2 -translate-y-1/2 cursor-grab text-gray-500 hover:text-gray-700"
-            title="Drag to reorder"
-          >
-            <FaGripVertical size={20} />
-          </div>
-          <button
-            onClick={() => removeSection(section.id)}
-            className="absolute top-2 right-2 text-red-500 hover:text-red-600 transition-colors duration-200"
-            title="Delete section"
-          >
-            <FaTrashAlt size={18} />
-          </button>
-        </>
+        <button
+          onClick={() => removeSection(section.id)}
+          className="absolute top-2 right-4 z-10 text-red-500 hover:text-red-600 transition-colors duration-200"
+          title="Delete section"
+        >
+          <FaTrashAlt size={18} />
+        </button>
       )}
-      <div className={isLocked ? "" : "pl-8"}>
+      <div>
         {Component ? (
           <Component sectionId={section.id} finalMode={false} />
         ) : (
