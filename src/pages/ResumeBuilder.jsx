@@ -26,7 +26,7 @@ const ResumeBuilder = () => {
     spacing: "1rem",
     textColor: "#000000",
     backgroundColor: "#ffffff",
-    template: "", // store the selected template id here
+    template: "",
   });
   const [finalMode, setFinalMode] = useState(false);
   const resumeRef = useRef(null);
@@ -62,7 +62,7 @@ const ResumeBuilder = () => {
     { id: "footer", label: "Footer", icon: <FiLayout />, color: "bg-red-100" },
   ];
 
-  // Wrapper function to ensure uniqueness when adding via the Elements Panel.
+  // Ensure unique sections.
   const handleAddSectionUnique = (sectionType) => {
     if (sections.some((s) => s.type === sectionType)) return;
     addSection(sectionType);
@@ -90,7 +90,7 @@ const ResumeBuilder = () => {
       }
     }
 
-    // Adjust for header/footer positioning
+    // Adjust for header/footer positioning.
     const headerIndex = sections.findIndex((s) => s.type === "header");
     const footerIndex = sections.findIndex((s) => s.type === "footer");
 
@@ -99,13 +99,11 @@ const ResumeBuilder = () => {
       insertIndex = footerIndex - 1;
 
     if (existingSectionId) {
-      // Moving an existing section
       const draggedSection = sections.find((s) => s.id === existingSectionId);
       if (!draggedSection) return;
       if (["header", "footer"].includes(draggedSection.type)) return;
       moveSection(existingSectionId, insertIndex);
     } else if (newSectionId) {
-      // Prevent duplicate sections for any type.
       if (sections.some((s) => s.type === newSectionId)) return;
       addSection(newSectionId, insertIndex);
     }
@@ -117,7 +115,6 @@ const ResumeBuilder = () => {
   };
 
   return (
-    // Outer container prevents page scroll with overflow-hidden
     <div className="flex h-screen overflow-hidden relative">
       {/* Left Panel */}
       <div className="w-1/5 border-r border-gray-200 p-4 overflow-y-auto">
@@ -136,14 +133,18 @@ const ResumeBuilder = () => {
 
       {/* Preview Panel Container */}
       <div className="flex-1 p-4 relative overflow-hidden" ref={resumeRef}>
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between items-center mb-4 space-x-4">
+          <h2 className="text-xl font-bold text-gray-800">
+            {finalMode ? "Final Resume Preview" : "Resume Preview"}
+          </h2>
           <button
             onClick={() => setFinalMode((prev) => !prev)}
-            className="px-4 py-2 rounded-lg border border-gray-300 bg-white shadow-sm text-gray-800 hover:bg-gray-100"
+            className="px-6 py-2 rounded-lg border border-blue-500 bg-blue-500 text-white shadow-md hover:bg-blue-600 transition-colors"
           >
             {finalMode ? "Switch to Edit Mode" : "Generate"}
           </button>
         </div>
+        {/* The PreviewPanel no longer renders its own heading */}
         <PreviewPanel
           resumeRef={resumeRef}
           sections={sections}
@@ -158,7 +159,7 @@ const ResumeBuilder = () => {
         />
       </div>
 
-      {/* Right Panel is rendered via its own fixed component */}
+      {/* Right Panel */}
       <RightPanel
         customizations={customizations}
         applyTemplate={(templateId) =>

@@ -13,18 +13,11 @@ const PreviewPanel = ({
   customizations,
   finalMode,
 }) => {
-  // Use the provided template component or default to "single-column"
   const TemplateComponent =
     templateComponents[currentTemplate] || templateComponents["single-column"];
 
   return (
     <div className="bg-gray-100 p-6 rounded-lg shadow-md h-full w-full overflow-hidden">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-800">
-          {finalMode ? "Final Resume Preview" : "Resume Preview"}
-        </h2>
-      </div>
-
       <div
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
@@ -34,7 +27,7 @@ const PreviewPanel = ({
           color: customizations.textColor,
           backgroundColor: customizations.backgroundColor,
         }}
-        className="p-6 rounded-lg shadow-inner h-[calc(100%-100px)] overflow-y-auto overflow-x-hidden"
+        className="p-6 rounded-lg shadow-inner h-[calc(100%-60px)] overflow-y-auto overflow-x-hidden"
       >
         {contextMenu && !finalMode && (
           <ContextMenu
@@ -45,16 +38,14 @@ const PreviewPanel = ({
           />
         )}
 
-        {!finalMode && (
+        {!finalMode ? (
           <TemplateComponent
             sections={sections}
             customizations={customizations}
             removeSection={removeSection}
             finalMode={finalMode}
           />
-        )}
-
-        {finalMode && (
+        ) : (
           <div className="h-full">
             <ResumeGenerator disableDownload={!finalMode} />
           </div>

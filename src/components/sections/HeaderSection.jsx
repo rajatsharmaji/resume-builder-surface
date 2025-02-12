@@ -1,4 +1,3 @@
-// src/components/HeaderSection.jsx
 import { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import {
@@ -48,7 +47,7 @@ const HeaderSection = ({ sectionId, finalMode = false }) => {
     try {
       setIsGenerating(true);
       setError("");
-      // Replace with your actual API call.
+      // Simulated API call – replace with your actual API endpoint.
       const response = await new Promise((resolve) =>
         setTimeout(
           () =>
@@ -81,7 +80,7 @@ const HeaderSection = ({ sectionId, finalMode = false }) => {
     try {
       setIsFetchingHeader(true);
       setError("");
-      // Replace with your actual API call.
+      // Simulated API call – replace with your actual API endpoint.
       const response = await new Promise((resolve) =>
         setTimeout(
           () =>
@@ -117,7 +116,7 @@ const HeaderSection = ({ sectionId, finalMode = false }) => {
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-2">
             <FiUser className="w-6 h-6 text-blue-500" />
-            <h2 className="text-xl font-bold text-gray-800">Hero Section</h2>
+            <h2 className="text-xl font-bold text-gray-800">Header</h2>
           </div>
         </div>
         {/* Header Content */}
@@ -163,14 +162,12 @@ const HeaderSection = ({ sectionId, finalMode = false }) => {
       draggable
       onDragStart={fetchHeaderData} // Dragging auto-fills header data.
     >
-      {/* Header Row with Icon, "Hero Section" Heading, and Action Buttons */}
+      {/* Header Row with Icon, "Header" Heading, and Action Buttons */}
       <div className="flex justify-between items-center mb-4">
-        {/* Left Side: User Icon and Hero Section Heading */}
         <div className="flex items-center gap-2">
           <FiUser className="w-6 h-6 text-blue-500" />
-          <h2 className="text-xl font-bold text-gray-800">Hero Section</h2>
+          <h2 className="text-xl font-bold text-gray-800">Header</h2>
         </div>
-        {/* Right Side: Action Icons */}
         <div className="flex items-center gap-2">
           <button
             onClick={generateAIContent}
@@ -197,38 +194,43 @@ const HeaderSection = ({ sectionId, finalMode = false }) => {
 
       {error && <div className="mb-3 text-sm text-red-600">{error}</div>}
 
-      {/* Display Header Details */}
-      <div className="flex flex-col items-center mb-4">
-        <h1 className="text-4xl font-bold text-gray-800">
-          {header.name || "Your Name"}
-        </h1>
-        <div className="flex justify-center space-x-6 mt-2 text-sm text-gray-600">
-          {header.email && (
-            <div className="flex items-center space-x-1">
-              <FiMail size={16} className="text-gray-500" />
-              <span>{header.email}</span>
-            </div>
-          )}
-          {header.phone && (
-            <div className="flex items-center space-x-1">
-              <FiPhone size={16} className="text-gray-500" />
-              <span>{header.phone}</span>
-            </div>
-          )}
-          {header.linkedin && (
-            <div className="flex items-center space-x-1">
-              <FiLinkedin size={16} className="text-blue-500" />
-              <span>{header.linkedin}</span>
-            </div>
-          )}
-          {header.github && (
-            <div className="flex items-center space-x-1">
-              <FiGithub size={16} className="text-gray-500" />
-              <span>{header.github}</span>
-            </div>
-          )}
+      {/* Read-only Display of Header Details (clicking toggles editing) */}
+      {!isEditing && (
+        <div
+          className="flex flex-col items-center mb-4 cursor-text"
+          onClick={() => setIsEditing(true)}
+        >
+          <h1 className="text-4xl font-bold text-gray-800">
+            {header.name || "Your Name"}
+          </h1>
+          <div className="flex justify-center space-x-6 mt-2 text-sm text-gray-600">
+            {header.email && (
+              <div className="flex items-center space-x-1">
+                <FiMail size={16} className="text-gray-500" />
+                <span>{header.email}</span>
+              </div>
+            )}
+            {header.phone && (
+              <div className="flex items-center space-x-1">
+                <FiPhone size={16} className="text-gray-500" />
+                <span>{header.phone}</span>
+              </div>
+            )}
+            {header.linkedin && (
+              <div className="flex items-center space-x-1">
+                <FiLinkedin size={16} className="text-blue-500" />
+                <span>{header.linkedin}</span>
+              </div>
+            )}
+            {header.github && (
+              <div className="flex items-center space-x-1">
+                <FiGithub size={16} className="text-gray-500" />
+                <span>{header.github}</span>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Editable Input Fields */}
       {isEditing && (
