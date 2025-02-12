@@ -13,6 +13,7 @@ import {
   FiLayout,
   FiUser,
 } from "react-icons/fi";
+import { MdFlashOn } from "react-icons/md";
 
 const ResumeBuilder = () => {
   const { sections, addSection, moveSection, removeSection } = useResume();
@@ -135,13 +136,18 @@ const ResumeBuilder = () => {
       <div className="flex-1 p-4 relative overflow-hidden" ref={resumeRef}>
         <div className="flex justify-between items-center mb-4 space-x-4">
           <h2 className="text-xl font-bold text-gray-800">
-            {finalMode ? "Final Resume Preview" : "Resume Preview"}
+            {finalMode ? "Preview" : "Builder"}
           </h2>
           <button
             onClick={() => setFinalMode((prev) => !prev)}
-            className="px-6 py-2 rounded-lg border border-blue-500 bg-blue-500 text-white shadow-md hover:bg-blue-600 transition-colors"
+            className="relative inline-flex items-center justify-center overflow-hidden rounded border border-blue-500 bg-transparent px-5 py-2 font-medium text-blue-600 shadow-sm transition-all duration-300 hover:bg-blue-50 hover:shadow-md hover:-translate-y-0.25 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:ring-offset-2 active:translate-y-0"
           >
-            {finalMode ? "Switch to Edit Mode" : "Generate"}
+            <span className="relative flex items-center gap-2 text-sm">
+              <MdFlashOn className="w-4 h-4 text-blue-600 transition-transform duration-300 group-hover:scale-110" />
+              <span className="tracking-normal">
+                {finalMode ? "Edit Mode" : "Generate"}
+              </span>
+            </span>
           </button>
         </div>
         {/* The PreviewPanel no longer renders its own heading */}
