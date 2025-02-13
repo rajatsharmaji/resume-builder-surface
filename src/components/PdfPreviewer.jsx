@@ -39,7 +39,7 @@ const PdfPreviewer = ({ pdfDataUrl }) => {
         <EnterFullScreen />
       </div>
       {/* Viewer */}
-      <div className="flex-grow">
+      <div className="flex-grow overflow-auto">
         <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
           <Viewer fileUrl={pdfDataUrl} plugins={[fullScreenPluginInstance]} />
         </Worker>
