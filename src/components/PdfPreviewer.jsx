@@ -1,12 +1,15 @@
 import PropTypes from "prop-types";
-import { Viewer, Worker } from "@react-pdf-viewer/core";
-import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
+import { Worker, Viewer } from "@react-pdf-viewer/core";
+import { fullScreenPlugin } from "@react-pdf-viewer/full-screen";
 import "@react-pdf-viewer/core/lib/styles/index.css";
-import "@react-pdf-viewer/default-layout/lib/styles/index.css";
+import "@react-pdf-viewer/full-screen/lib/styles/index.css";
 
 const PdfPreviewer = ({ pdfDataUrl }) => {
-  const defaultLayoutPluginInstance = defaultLayoutPlugin();
+  // Initialize the full-screen plugin and extract the full-screen button component.
+  const fullScreenPluginInstance = fullScreenPlugin();
+  const { EnterFullScreen } = fullScreenPluginInstance;
 
+  // Render a friendly message if there's no PDF to preview.
   if (!pdfDataUrl) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
@@ -30,17 +33,18 @@ const PdfPreviewer = ({ pdfDataUrl }) => {
   }
 
   return (
-    <div
-      className="relative w-full h-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm overflow-hidden"
-      style={{ height: "100%" }}
-    >
-      <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
-        <Viewer
-          fileUrl={pdfDataUrl}
-          plugins={[defaultLayoutPluginInstance]}
-          className="h-full w-full"
-        />
-      </Worker>
+    <div className="w-full h-full bg-gray-50 border border-gray-200 rounded-lg shadow-sm overflow-hidden flex flex-col">
+      {/* Minimal toolbar with only the full-screen button */}
+      <div className="flex items-center justify-end p-2 bg-white border-b">
+        <EnterFullScreen />
+      </div>
+
+      {/* PDF Viewer area */}
+      <div className="flex-grow">
+        <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
+          <Viewer fileUrl={pdfDataUrl} plugins={[fullScreenPluginInstance]} />
+        </Worker>
+      </div>
     </div>
   );
 };
