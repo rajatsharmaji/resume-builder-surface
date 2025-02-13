@@ -12,8 +12,10 @@ import {
   FiFileText,
   FiLayout,
   FiUser,
+  FiMenu,
+  FiX,
 } from "react-icons/fi";
-import { MdFlashOn } from "react-icons/md";
+import { MdFlashOn, MdSettings } from "react-icons/md";
 
 const ResumeBuilder = () => {
   const { sections, addSection, moveSection, removeSection } = useResume();
@@ -31,6 +33,10 @@ const ResumeBuilder = () => {
   });
   const [finalMode, setFinalMode] = useState(false);
   const resumeRef = useRef(null);
+
+  // State to toggle mobile panels
+  const [showLeftPanel, setShowLeftPanel] = useState(false);
+  const [showRightPanel, setShowRightPanel] = useState(false);
 
   const sectionTypes = [
     { id: "header", label: "Header", icon: <FiUser />, color: "bg-red-100" },
@@ -78,7 +84,10 @@ const ResumeBuilder = () => {
 
     const previewRect = resumeRef.current.getBoundingClientRect();
     const dropY = e.clientY - previewRect.top;
-    const sectionNodes = Array.from(resumeRef.current.children);
+    // Query only the sections by a dedicated class to avoid picking up extra nodes.
+    const sectionNodes = Array.from(
+      resumeRef.current.querySelectorAll(".draggable-section")
+    );
     let insertIndex = sections.length;
 
     for (let i = 0; i < sectionNodes.length; i++) {
@@ -117,40 +126,91 @@ const ResumeBuilder = () => {
 
   return (
     <div className="flex h-screen overflow-hidden relative">
-      {/* Left Panel */}
-      <div className="w-1/5 border-r border-gray-200 p-4 overflow-y-auto">
-        <ElementsPanel
-          sectionTypes={sectionTypes}
-          addSection={handleAddSectionUnique}
-          handleDragStart={(e, id) => e.dataTransfer.setData("sectionId", id)}
-          sections={sections}
-        />
-        <LayersPanel
-          sections={sections}
-          moveSection={moveSection}
-          removeSection={removeSection}
-        />
+      {/* Mobile Toggle Buttons */}
+      <div className="md:hidden fixed top-4 left-4 z-50">
+        <button
+          onClick={() => setShowLeftPanel(true)}
+          className="p-2 bg-white rounded-full shadow focus:outline-none"
+        >
+          <FiMenu size={28} className="text-blue-600" />
+        </button>
+      </div>
+      <div className="md:hidden fixed top-4 right-4 z-50">
+        <button
+          onClick={() => setShowRightPanel(true)}
+          className="p-2 bg-white rounded-full shadow focus:outline-none"
+        >
+          <MdSettings size={28} className="text-blue-600" />
+        </button>
       </div>
 
-      {/* Preview Panel Container */}
-      <div className="flex-1 p-4 relative overflow-hidden" ref={resumeRef}>
+      {/* Left Panel for medium screens and above */}
+      <div className="hidden md:flex flex-col w-64 border-r border-gray-200 p-4">
+        <div className="mb-4 flex-1 overflow-y-auto">
+          <ElementsPanel
+            sectionTypes={sectionTypes}
+            addSection={handleAddSectionUnique}
+          />
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          <LayersPanel
+            sections={sections}
+            moveSection={moveSection}
+            removeSection={removeSection}
+          />
+        </div>
+      </div>
+
+      {/* Mobile Left Panel Overlay */}
+      {showLeftPanel && (
+        <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40">
+          <div className="absolute left-0 top-0 bottom-0 w-3/4 bg-white p-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold">Elements & Layers</h3>
+              <button
+                onClick={() => setShowLeftPanel(false)}
+                className="p-1 rounded-full focus:outline-none"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            {/* Two separate scrollable areas */}
+            <div className="mb-4 h-1/2 overflow-y-auto">
+              <ElementsPanel
+                sectionTypes={sectionTypes}
+                addSection={handleAddSectionUnique}
+              />
+            </div>
+            <div className="h-1/2 overflow-y-auto">
+              <LayersPanel
+                sections={sections}
+                moveSection={moveSection}
+                removeSection={removeSection}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Panel Container with reduced width */}
+      <div
+        className="flex-1 p-4 relative overflow-hidden max-w-4xl mx-auto"
+        ref={resumeRef}
+      >
         <div className="flex justify-between items-center mb-4 space-x-4">
           <h2 className="text-xl font-bold text-gray-800">
             {finalMode ? "Preview" : "Builder"}
           </h2>
           <button
             onClick={() => setFinalMode((prev) => !prev)}
-            className="relative inline-flex items-center justify-center overflow-hidden rounded border border-blue-500 bg-transparent px-5 py-2 font-medium text-blue-600 shadow-sm transition-all duration-300 hover:bg-blue-50 hover:shadow-md hover:-translate-y-0.25 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:ring-offset-2 active:translate-y-0"
+            className="relative inline-flex items-center justify-center rounded border border-blue-500 bg-transparent px-5 py-2 text-sm font-medium text-blue-600 shadow-sm transition-all duration-300 hover:bg-blue-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-100 focus:ring-offset-2"
           >
-            <span className="relative flex items-center gap-2 text-sm">
-              <MdFlashOn className="w-4 h-4 text-blue-600 transition-transform duration-300 group-hover:scale-110" />
-              <span className="tracking-normal">
-                {finalMode ? "Edit Mode" : "Generate"}
-              </span>
+            <span className="flex items-center gap-2">
+              <MdFlashOn className="w-4 h-4 text-blue-600" />
+              <span>{finalMode ? "Edit Mode" : "Generate"}</span>
             </span>
           </button>
         </div>
-        {/* The PreviewPanel no longer renders its own heading */}
         <PreviewPanel
           resumeRef={resumeRef}
           sections={sections}
@@ -165,13 +225,38 @@ const ResumeBuilder = () => {
         />
       </div>
 
-      {/* Right Panel */}
-      <RightPanel
-        customizations={customizations}
-        applyTemplate={(templateId) =>
-          setCustomizations((prev) => ({ ...prev, template: templateId }))
-        }
-      />
+      {/* Right Panel for medium screens and above */}
+      <div className="hidden md:block w-64 border-l border-gray-200 p-4 overflow-y-auto">
+        <RightPanel
+          customizations={customizations}
+          applyTemplate={(templateId) =>
+            setCustomizations((prev) => ({ ...prev, template: templateId }))
+          }
+        />
+      </div>
+
+      {/* Mobile Right Panel Overlay */}
+      {showRightPanel && (
+        <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40">
+          <div className="absolute right-0 top-0 bottom-0 w-3/4 bg-white p-4 overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold">Customization</h3>
+              <button
+                onClick={() => setShowRightPanel(false)}
+                className="p-1 rounded-full focus:outline-none"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <RightPanel
+              customizations={customizations}
+              applyTemplate={(templateId) =>
+                setCustomizations((prev) => ({ ...prev, template: templateId }))
+              }
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -14,15 +14,14 @@ import {
 
 const TemplatePreviewModal = ({ template, onClose }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl m-4 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
         >
           <FiX className="w-6 h-6 text-gray-600" />
         </button>
-
         <div className="p-8">
           <div className="mb-6">
             <div
@@ -41,7 +40,7 @@ const TemplatePreviewModal = ({ template, onClose }) => {
             {template.name}
           </h3>
           <p className="text-gray-600 mb-4">{template.description}</p>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {template.features.map((feature, index) => (
               <span
                 key={index}
@@ -55,6 +54,18 @@ const TemplatePreviewModal = ({ template, onClose }) => {
       </div>
     </div>
   );
+};
+
+TemplatePreviewModal.propTypes = {
+  template: PropTypes.shape({
+    name: PropTypes.string,
+    description: PropTypes.string,
+    color: PropTypes.string,
+    icon: PropTypes.elementType,
+    preview: PropTypes.elementType,
+    features: PropTypes.arrayOf(PropTypes.string),
+  }).isRequired,
+  onClose: PropTypes.func.isRequired,
 };
 
 const TemplateCard = ({ template, isSelected, onClick, onPreview }) => {
@@ -78,8 +89,11 @@ const TemplateCard = ({ template, isSelected, onClick, onPreview }) => {
 
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-semibold text-gray-900">{template.name}</h3>
-          <p className="text-sm text-gray-500">{template.sections} sections</p>
+          {/* Reduced font size for the template name */}
+          <h3 className="font-semibold text-gray-900 text-sm">
+            {template.name}
+          </h3>
+          <p className="text-xs text-gray-500">{template.sections} sections</p>
         </div>
         <button
           onClick={(e) => {
@@ -99,6 +113,22 @@ const TemplateCard = ({ template, isSelected, onClick, onPreview }) => {
       )}
     </div>
   );
+};
+
+TemplateCard.propTypes = {
+  template: PropTypes.shape({
+    id: PropTypes.string,
+    name: PropTypes.string,
+    sections: PropTypes.number,
+    features: PropTypes.arrayOf(PropTypes.string),
+    description: PropTypes.string,
+    color: PropTypes.string,
+    icon: PropTypes.elementType,
+    preview: PropTypes.elementType,
+  }).isRequired,
+  isSelected: PropTypes.bool.isRequired,
+  onClick: PropTypes.func.isRequired,
+  onPreview: PropTypes.func.isRequired,
 };
 
 const TemplatePanel = ({ applyTemplate, customizations }) => {
@@ -180,17 +210,21 @@ const TemplatePanel = ({ applyTemplate, customizations }) => {
   );
 };
 
+TemplatePanel.propTypes = {
+  applyTemplate: PropTypes.func.isRequired,
+  customizations: PropTypes.object.isRequired,
+};
+
 const RightPanel = ({ applyTemplate, customizations }) => {
   return (
-    <div className="w-80 h-screen sticky top-0 bg-white border-l border-gray-100 flex flex-col">
-      <div className="p-6 pb-4 border-b border-gray-100">
-        <h3 className="text-xl font-bold text-gray-900 mb-1">Templates</h3>
-        <p className="text-sm text-gray-500">
+    <div className="hidden md:flex md:flex-col w-full md:w-48 h-full md:h-screen sticky top-0 bg-white border-l border-gray-100">
+      <div className="p-3 pb-2 border-b border-gray-100">
+        <h3 className="text-lg font-bold text-gray-900 mb-1">Templates</h3>
+        <p className="text-xs text-gray-500">
           Choose from professional layouts
         </p>
       </div>
-
-      <div className="flex-1 overflow-y-auto px-4 py-6">
+      <div className="flex-1 overflow-y-auto px-2 py-3">
         <TemplatePanel
           applyTemplate={applyTemplate}
           customizations={customizations}
@@ -204,5 +238,4 @@ RightPanel.propTypes = {
   applyTemplate: PropTypes.func.isRequired,
   customizations: PropTypes.object.isRequired,
 };
-
 export default RightPanel;

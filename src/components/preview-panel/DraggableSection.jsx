@@ -1,7 +1,8 @@
-/* eslint-disable react/prop-types */
 import { useState } from "react";
-import ReactDOM from "react-dom";
+import { createPortal } from "react-dom";
+import PropTypes from "prop-types";
 import { FaTrashAlt } from "react-icons/fa";
+
 import HeaderSection from "../sections/HeaderSection";
 import FooterSection from "../sections/FooterSection";
 import EducationSection from "../sections/EducationSection";
@@ -11,6 +12,7 @@ import AboutSection from "../sections/AboutSection";
 import ProjectsSection from "../sections/ProjectsSection";
 import CertificationsSection from "../sections/CertificationsSection";
 
+// Map section types to their respective components.
 const sectionComponents = {
   header: HeaderSection,
   footer: FooterSection,
@@ -22,14 +24,14 @@ const sectionComponents = {
   certifications: CertificationsSection,
 };
 
-// Generic Confirmation Dialog rendered via a Portal
+// A reusable confirmation dialog rendered via a portal.
 const ConfirmDialog = ({ title, message, onConfirm, onCancel }) => {
-  return ReactDOM.createPortal(
-    <div className="fixed inset-0 flex items-center justify-center z-50">
+  return createPortal(
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black opacity-50"></div>
+      <div className="absolute inset-0 bg-black opacity-50" />
       {/* Modal */}
-      <div className="bg-white rounded-lg p-6 z-50 max-w-sm mx-auto shadow-lg transition-all">
+      <div className="bg-white rounded-lg p-6 z-50 max-w-sm mx-auto shadow-lg">
         <h3 className="text-lg font-semibold mb-4 text-gray-800">{title}</h3>
         <p className="text-gray-700 mb-6">{message}</p>
         <div className="flex justify-end gap-3">
@@ -52,16 +54,27 @@ const ConfirmDialog = ({ title, message, onConfirm, onCancel }) => {
   );
 };
 
+ConfirmDialog.propTypes = {
+  title: PropTypes.string.isRequired,
+  message: PropTypes.string.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+};
+
+// The DraggableSection component displays a section and handles deletion.
 const DraggableSection = ({ section, removeSection, finalMode = false }) => {
   const Component = sectionComponents[section.type];
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // All sections are non-draggable.
+  // If you intend for the section to be draggable, set draggable to true.
+  // (If not, you can set draggable={false} and remove the onDragStart handler.)
   const handleDragStart = (e) => {
+    // Allow drag events (remove preventDefault if you want actual dragging)
     e.preventDefault();
   };
 
-  const handleDelete = () => {
+  const handleDelete = (e) => {
+    e.stopPropagation();
     setShowConfirm(true);
   };
 
@@ -74,6 +87,7 @@ const DraggableSection = ({ section, removeSection, finalMode = false }) => {
     setShowConfirm(false);
   };
 
+  // When in final mode, simply render the component without the deletion UI.
   if (finalMode) {
     return (
       <div className="mb-4">
@@ -88,17 +102,14 @@ const DraggableSection = ({ section, removeSection, finalMode = false }) => {
 
   return (
     <div
-      draggable={false}
+      draggable={true}
       onDragStart={handleDragStart}
       className="mb-4 border border-gray-200 rounded-lg p-4 bg-white shadow-sm relative transition-transform hover:shadow-md hover:-translate-y-1"
     >
-      {/* Delete icon for non-header sections */}
+      {/* Show delete icon for non-header sections */}
       {section.type !== "header" && (
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDelete();
-          }}
+          onClick={handleDelete}
           className="absolute top-2 right-4 z-10 text-red-500 hover:text-red-600 transition-colors duration-200"
           title="Delete section"
         >
@@ -112,7 +123,6 @@ const DraggableSection = ({ section, removeSection, finalMode = false }) => {
           <p className="text-gray-500">Unknown Section Type</p>
         )}
       </div>
-      {/* Render confirmation dialog as a full-page overlay */}
       {showConfirm && (
         <ConfirmDialog
           title="Confirm Removal"
@@ -123,6 +133,15 @@ const DraggableSection = ({ section, removeSection, finalMode = false }) => {
       )}
     </div>
   );
+};
+
+DraggableSection.propTypes = {
+  section: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    type: PropTypes.string.isRequired,
+  }).isRequired,
+  removeSection: PropTypes.func.isRequired,
+  finalMode: PropTypes.bool,
 };
 
 export default DraggableSection;

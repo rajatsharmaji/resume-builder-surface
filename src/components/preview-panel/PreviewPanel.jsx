@@ -17,7 +17,7 @@ const PreviewPanel = ({
     templateComponents[currentTemplate] || templateComponents["single-column"];
 
   return (
-    <div className="bg-gray-100 p-0 rounded-lg shadow-md h-full w-full overflow-hidden">
+    <div className="bg-gray-100 rounded-lg shadow-md w-full h-full flex flex-col">
       <div
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
@@ -27,14 +27,14 @@ const PreviewPanel = ({
           color: customizations.textColor,
           backgroundColor: customizations.backgroundColor,
         }}
-        className="p-0 rounded-lg shadow-inner h-[calc(100%-60px)] overflow-y-auto overflow-x-hidden"
+        className="flex-1 overflow-y-auto overflow-x-hidden p-4"
       >
         {contextMenu && !finalMode && (
           <ContextMenu
             x={contextMenu.x}
             y={contextMenu.y}
-            onClose={() => setContextMenu(null)}
-            onRemove={() => removeSection(contextMenu.sectionId)}
+            closeMenu={() => setContextMenu(null)}
+            onRemoveSection={() => removeSection(contextMenu.sectionId)}
           />
         )}
 
@@ -46,7 +46,7 @@ const PreviewPanel = ({
             finalMode={finalMode}
           />
         ) : (
-          <div className="h-full">
+          <div className="flex-grow">
             <ResumeGenerator disableDownload={!finalMode} />
           </div>
         )}

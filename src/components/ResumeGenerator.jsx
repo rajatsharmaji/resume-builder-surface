@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
-import { FiDownload, FiEdit, FiLoader } from "react-icons/fi";
+import { FiDownload, FiEdit } from "react-icons/fi";
+import Loader from "./common/Loader"; // Import your thunder loader here
 import PdfPreviewer from "./PdfPreviewer";
 import PdfEditor from "./PdfEditor";
 
@@ -83,7 +84,7 @@ const ResumeGenerator = ({ className = "", disableDownload = true }) => {
       <div className="mb-6">
         {isLoading && (
           <div className="flex items-center text-blue-600">
-            <FiLoader className="animate-spin mr-2" />
+            <Loader size="md" className="mr-2" />
             <span>Generating PDF…</span>
           </div>
         )}

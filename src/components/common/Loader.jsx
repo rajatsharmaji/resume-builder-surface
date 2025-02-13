@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 
 const Loader = ({ size }) => {
-  // Define dimensions based on size prop
+  // Determine the overall dimensions based on the provided size prop.
   let dimension;
   switch (size) {
     case "sm":
@@ -20,25 +20,22 @@ const Loader = ({ size }) => {
     <svg
       width={dimension}
       height={dimension}
-      viewBox="0 0 38 38"
+      viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      stroke="#1D4ED8" // Tailwind CSS blue-500 equivalent
     >
-      <g fill="none" fillRule="evenodd">
-        <g transform="translate(1 1)" strokeWidth="2">
-          <circle strokeOpacity=".5" cx="18" cy="18" r="18" />
-          <path d="M36 18c0-9.94-8.06-18-18-18">
-            <animateTransform
-              attributeName="transform"
-              type="rotate"
-              from="0 18 18"
-              to="360 18 18"
-              dur="1s"
-              repeatCount="indefinite"
-            />
-          </path>
-        </g>
-      </g>
+      {/* Lightning bolt shape */}
+      <path
+        d="M7 2v11h3v9l7-12h-4l4-8z"
+        fill="#1D4ED8" // Tailwind blue-500 equivalent
+      >
+        {/* Animate opacity to create a flicker effect */}
+        <animate
+          attributeName="opacity"
+          values="0.2;1;0.2"
+          dur="0.8s"
+          repeatCount="indefinite"
+        />
+      </path>
     </svg>
   );
 };
