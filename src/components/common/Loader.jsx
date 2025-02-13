@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 
-const Loader = ({ size }) => {
+const Loader = ({ size = "md" }) => {
   // Determine the overall dimensions based on the provided size prop.
   let dimension;
   switch (size) {
@@ -42,10 +42,6 @@ const Loader = ({ size }) => {
 
 Loader.propTypes = {
   size: PropTypes.oneOf(["sm", "md", "lg"]),
-};
-
-Loader.defaultProps = {
-  size: "md",
 };
 
 export default Loader;

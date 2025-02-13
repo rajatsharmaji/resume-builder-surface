@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import useResume from "../hooks/useResume";
 import ElementsPanel from "../components/left-panel/ElementsPanel";
 import LayersPanel from "../components/left-panel/LayersPanel";
@@ -20,7 +20,9 @@ import { MdFlashOn, MdSettings } from "react-icons/md";
 const ResumeBuilder = () => {
   const { sections, addSection, moveSection, removeSection } = useResume();
   const [contextMenu, setContextMenu] = useState(null);
-  const [currentTemplate] = useState("default");
+  const resumeRef = useRef(null);
+
+  // Initialize customizations with a default template.
   const [customizations, setCustomizations] = useState({
     font: "Roboto, sans-serif",
     fontSize: 16,
@@ -29,11 +31,29 @@ const ResumeBuilder = () => {
     spacing: "1rem",
     textColor: "#000000",
     backgroundColor: "#ffffff",
-    template: "",
+    template: "deedy-cv", // Default template
   });
-  const [finalMode, setFinalMode] = useState(false);
-  const resumeRef = useRef(null);
 
+  // On mount, check localStorage for a stored template.
+  useEffect(() => {
+    const storedTemplate = localStorage.getItem("selectedTemplate");
+    if (storedTemplate) {
+      setCustomizations((prev) => ({ ...prev, template: storedTemplate }));
+    } else {
+      localStorage.setItem("selectedTemplate", customizations.template);
+    }
+  }, []);
+
+  // Update the selected template both in state and localStorage.
+  const handleApplyTemplate = (templateId) => {
+    setCustomizations((prev) => {
+      const newCustomizations = { ...prev, template: templateId };
+      localStorage.setItem("selectedTemplate", templateId);
+      return newCustomizations;
+    });
+  };
+
+  const [finalMode, setFinalMode] = useState(false);
   const [showLeftPanel, setShowLeftPanel] = useState(false);
   const [showRightPanel, setShowRightPanel] = useState(false);
 
@@ -120,6 +140,17 @@ const ResumeBuilder = () => {
     if (!finalMode) setContextMenu({ x: e.pageX, y: e.pageY, sectionId: id });
   };
 
+  // When "Generate" is clicked, log all resume details as JSON
+  // and then switch to preview (final) mode.
+  const handleGenerate = () => {
+    const resumeData = {
+      sections,
+      customizations,
+    };
+    console.log("Generated Resume Data:", JSON.stringify(resumeData, null, 2));
+    setFinalMode(true);
+  };
+
   return (
     <div className="flex h-screen overflow-hidden relative">
       {/* Mobile Toggle Buttons */}
@@ -203,7 +234,7 @@ const ResumeBuilder = () => {
             {finalMode ? "Preview" : "Builder"}
           </h2>
           <button
-            onClick={() => setFinalMode((prev) => !prev)}
+            onClick={handleGenerate}
             className="relative inline-flex items-center justify-center rounded-lg border border-blue-500 bg-transparent px-4 py-2 text-sm font-medium text-blue-600 shadow-sm transition-all duration-300 hover:bg-blue-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-100"
           >
             <span className="flex items-center gap-2">
@@ -220,7 +251,7 @@ const ResumeBuilder = () => {
           setContextMenu={setContextMenu}
           handleRightClick={handleRightClick}
           handleDrop={handleDrop}
-          currentTemplate={currentTemplate}
+          currentTemplate="default"
           customizations={customizations}
           finalMode={finalMode}
           mobile={!finalMode}
@@ -231,9 +262,7 @@ const ResumeBuilder = () => {
       <div className="hidden md:block w-64 border-l border-gray-200 p-4 overflow-y-auto">
         <RightPanel
           customizations={customizations}
-          applyTemplate={(templateId) =>
-            setCustomizations((prev) => ({ ...prev, template: templateId }))
-          }
+          applyTemplate={handleApplyTemplate}
         />
       </div>
 
@@ -257,10 +286,7 @@ const ResumeBuilder = () => {
               <RightPanel
                 customizations={customizations}
                 applyTemplate={(templateId) => {
-                  setCustomizations((prev) => ({
-                    ...prev,
-                    template: templateId,
-                  }));
+                  handleApplyTemplate(templateId);
                   setShowRightPanel(false);
                 }}
                 mobile

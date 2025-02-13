@@ -66,10 +66,8 @@ const DraggableSection = ({ section, removeSection, finalMode = false }) => {
   const Component = sectionComponents[section.type];
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // If you intend for the section to be draggable, set draggable to true.
-  // (If not, you can set draggable={false} and remove the onDragStart handler.)
+  // Allow drag events.
   const handleDragStart = (e) => {
-    // Allow drag events (remove preventDefault if you want actual dragging)
     e.preventDefault();
   };
 
@@ -87,7 +85,7 @@ const DraggableSection = ({ section, removeSection, finalMode = false }) => {
     setShowConfirm(false);
   };
 
-  // When in final mode, simply render the component without the deletion UI.
+  // When in final mode, render the component without deletion UI.
   if (finalMode) {
     return (
       <div className="mb-4">
@@ -137,7 +135,8 @@ const DraggableSection = ({ section, removeSection, finalMode = false }) => {
 
 DraggableSection.propTypes = {
   section: PropTypes.shape({
-    id: PropTypes.string.isRequired,
+    // Updated to expect a number
+    id: PropTypes.number.isRequired,
     type: PropTypes.string.isRequired,
   }).isRequired,
   removeSection: PropTypes.func.isRequired,

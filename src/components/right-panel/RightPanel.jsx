@@ -89,7 +89,6 @@ const TemplateCard = ({ template, isSelected, onClick, onPreview }) => {
 
       <div className="flex items-center justify-between">
         <div>
-          {/* Reduced font size for the template name */}
           <h3 className="font-semibold text-gray-900 text-sm">
             {template.name}
           </h3>
@@ -215,9 +214,15 @@ TemplatePanel.propTypes = {
   customizations: PropTypes.object.isRequired,
 };
 
-const RightPanel = ({ applyTemplate, customizations }) => {
+const RightPanel = ({ applyTemplate, customizations, mobile }) => {
   return (
-    <div className="hidden md:flex md:flex-col w-full md:w-48 h-full md:h-screen sticky top-0 bg-white border-l border-gray-100">
+    <div
+      className={`${
+        mobile
+          ? ""
+          : "hidden md:flex md:flex-col w-full md:w-48 h-full md:h-screen sticky top-0 bg-white border-l border-gray-100"
+      }`}
+    >
       <div className="p-3 pb-2 border-b border-gray-100">
         <h3 className="text-lg font-bold text-gray-900 mb-1">Templates</h3>
         <p className="text-xs text-gray-500">
@@ -237,5 +242,7 @@ const RightPanel = ({ applyTemplate, customizations }) => {
 RightPanel.propTypes = {
   applyTemplate: PropTypes.func.isRequired,
   customizations: PropTypes.object.isRequired,
+  mobile: PropTypes.bool,
 };
+
 export default RightPanel;
