@@ -34,7 +34,6 @@ const ResumeBuilder = () => {
   const [finalMode, setFinalMode] = useState(false);
   const resumeRef = useRef(null);
 
-  // State to toggle mobile panels
   const [showLeftPanel, setShowLeftPanel] = useState(false);
   const [showRightPanel, setShowRightPanel] = useState(false);
 
@@ -69,7 +68,6 @@ const ResumeBuilder = () => {
     { id: "footer", label: "Footer", icon: <FiLayout />, color: "bg-red-100" },
   ];
 
-  // Ensure unique sections.
   const handleAddSectionUnique = (sectionType) => {
     if (sections.some((s) => s.type === sectionType)) return;
     addSection(sectionType);
@@ -84,7 +82,6 @@ const ResumeBuilder = () => {
 
     const previewRect = resumeRef.current.getBoundingClientRect();
     const dropY = e.clientY - previewRect.top;
-    // Query only the sections by a dedicated class to avoid picking up extra nodes.
     const sectionNodes = Array.from(
       resumeRef.current.querySelectorAll(".draggable-section")
     );
@@ -100,7 +97,6 @@ const ResumeBuilder = () => {
       }
     }
 
-    // Adjust for header/footer positioning.
     const headerIndex = sections.findIndex((s) => s.type === "header");
     const footerIndex = sections.findIndex((s) => s.type === "footer");
 
@@ -130,21 +126,21 @@ const ResumeBuilder = () => {
       <div className="md:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setShowLeftPanel(true)}
-          className="p-2 bg-white rounded-full shadow focus:outline-none"
+          className="p-2 bg-white rounded-lg shadow-md focus:outline-none active:scale-95 transition-transform border border-gray-200"
         >
-          <FiMenu size={28} className="text-blue-600" />
+          <FiMenu className="w-5 h-5 text-gray-700" />
         </button>
       </div>
       <div className="md:hidden fixed top-4 right-4 z-50">
         <button
           onClick={() => setShowRightPanel(true)}
-          className="p-2 bg-white rounded-full shadow focus:outline-none"
+          className="p-2 bg-white rounded-lg shadow-md focus:outline-none active:scale-95 transition-transform border border-gray-200"
         >
-          <MdSettings size={28} className="text-blue-600" />
+          <MdSettings className="w-5 h-5 text-gray-700" />
         </button>
       </div>
 
-      {/* Left Panel for medium screens and above */}
+      {/* Desktop Left Panel */}
       <div className="hidden md:flex flex-col w-64 border-r border-gray-200 p-4">
         <div className="mb-4 flex-1 overflow-y-auto">
           <ElementsPanel
@@ -161,40 +157,45 @@ const ResumeBuilder = () => {
         </div>
       </div>
 
-      {/* Mobile Left Panel Overlay */}
+      {/* Mobile Left Panel */}
       {showLeftPanel && (
-        <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40">
-          <div className="absolute left-0 top-0 bottom-0 w-3/4 bg-white p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold">Elements & Layers</h3>
+        <div className="md:hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40">
+          <div className="absolute left-0 top-0 bottom-0 w-64 bg-white p-4 flex flex-col">
+            <div className="flex justify-between items-center mb-4 pb-2 border-b">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Elements & Layers
+              </h3>
               <button
                 onClick={() => setShowLeftPanel(false)}
-                className="p-1 rounded-full focus:outline-none"
+                className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <FiX size={24} />
+                <FiX className="w-6 h-6 text-gray-600" />
               </button>
             </div>
-            {/* Two separate scrollable areas */}
-            <div className="mb-4 h-1/2 overflow-y-auto">
-              <ElementsPanel
-                sectionTypes={sectionTypes}
-                addSection={handleAddSectionUnique}
-              />
-            </div>
-            <div className="h-1/2 overflow-y-auto">
-              <LayersPanel
-                sections={sections}
-                moveSection={moveSection}
-                removeSection={removeSection}
-              />
+            <div className="flex-1 flex flex-col gap-4 overflow-hidden">
+              <div className="flex-1 overflow-y-auto">
+                <ElementsPanel
+                  sectionTypes={sectionTypes}
+                  addSection={handleAddSectionUnique}
+                  mobile
+                />
+              </div>
+              <div className="border-t pt-4 flex-1 overflow-y-auto">
+                <LayersPanel
+                  sections={sections}
+                  moveSection={moveSection}
+                  removeSection={removeSection}
+                  mobile
+                />
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Preview Panel Container with reduced width */}
+      {/* Main Preview Area */}
       <div
-        className="flex-1 p-4 relative overflow-hidden max-w-4xl mx-auto"
+        className="flex-1 p-4 relative overflow-hidden w-full md:max-w-4xl mx-auto mt-12 md:mt-0"
         ref={resumeRef}
       >
         <div className="flex justify-between items-center mb-4 space-x-4">
@@ -203,7 +204,7 @@ const ResumeBuilder = () => {
           </h2>
           <button
             onClick={() => setFinalMode((prev) => !prev)}
-            className="relative inline-flex items-center justify-center rounded border border-blue-500 bg-transparent px-5 py-2 text-sm font-medium text-blue-600 shadow-sm transition-all duration-300 hover:bg-blue-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-100 focus:ring-offset-2"
+            className="relative inline-flex items-center justify-center rounded-lg border border-blue-500 bg-transparent px-4 py-2 text-sm font-medium text-blue-600 shadow-sm transition-all duration-300 hover:bg-blue-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-100"
           >
             <span className="flex items-center gap-2">
               <MdFlashOn className="w-4 h-4 text-blue-600" />
@@ -222,10 +223,11 @@ const ResumeBuilder = () => {
           currentTemplate={currentTemplate}
           customizations={customizations}
           finalMode={finalMode}
+          mobile={!finalMode}
         />
       </div>
 
-      {/* Right Panel for medium screens and above */}
+      {/* Desktop Right Panel */}
       <div className="hidden md:block w-64 border-l border-gray-200 p-4 overflow-y-auto">
         <RightPanel
           customizations={customizations}
@@ -235,25 +237,44 @@ const ResumeBuilder = () => {
         />
       </div>
 
-      {/* Mobile Right Panel Overlay */}
+      {/* Mobile Right Panel - Fixed */}
       {showRightPanel && (
-        <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40">
-          <div className="absolute right-0 top-0 bottom-0 w-3/4 bg-white p-4 overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold">Customization</h3>
+        <div className="md:hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40">
+          <div className="absolute right-0 top-0 bottom-0 w-64 bg-white p-4 flex flex-col">
+            <div className="flex justify-between items-center mb-4 pb-2 border-b">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Customization
+              </h3>
               <button
                 onClick={() => setShowRightPanel(false)}
-                className="p-1 rounded-full focus:outline-none"
+                className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <FiX size={24} />
+                <FiX className="w-6 h-6 text-gray-600" />
               </button>
             </div>
-            <RightPanel
-              customizations={customizations}
-              applyTemplate={(templateId) =>
-                setCustomizations((prev) => ({ ...prev, template: templateId }))
-              }
-            />
+
+            <div className="flex-1 overflow-y-auto">
+              <RightPanel
+                customizations={customizations}
+                applyTemplate={(templateId) => {
+                  setCustomizations((prev) => ({
+                    ...prev,
+                    template: templateId,
+                  }));
+                  setShowRightPanel(false);
+                }}
+                mobile
+              />
+            </div>
+
+            <div className="pt-4 border-t">
+              <button
+                onClick={() => setShowRightPanel(false)}
+                className="w-full py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+              >
+                Close Settings
+              </button>
+            </div>
           </div>
         </div>
       )}

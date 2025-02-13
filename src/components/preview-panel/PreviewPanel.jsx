@@ -27,7 +27,7 @@ const PreviewPanel = ({
           color: customizations.textColor,
           backgroundColor: customizations.backgroundColor,
         }}
-        className="flex-1 overflow-y-auto overflow-x-hidden p-4"
+        className="flex-1 overflow-y-auto overflow-x-hidden p-1"
       >
         {contextMenu && !finalMode && (
           <ContextMenu
