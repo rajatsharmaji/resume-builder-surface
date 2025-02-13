@@ -79,7 +79,7 @@ const ResumeGenerator = ({ className = "", disableDownload = true }) => {
   };
 
   return (
-    <div className={`p-6 bg-white rounded-lg shadow-md ${className}`}>
+    <div className={`p-0 bg-white rounded-lg shadow-md ${className}`}>
       <div className="mb-6">
         {isLoading && (
           <div className="flex items-center text-blue-600">
@@ -99,17 +99,21 @@ const ResumeGenerator = ({ className = "", disableDownload = true }) => {
           <div className="mt-6 flex gap-4">
             <button
               onClick={handleDownload}
-              className="flex items-center px-5 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-300"
+              className="relative inline-flex items-center justify-center overflow-hidden rounded border border-purple-600 bg-transparent px-5 py-2 font-medium text-purple-600 shadow-sm transition-all duration-300 hover:bg-purple-50 hover:shadow-md hover:-translate-y-0.25 focus:outline-none focus:ring-2 focus:ring-purple-100 focus:ring-offset-2 active:translate-y-0"
             >
-              <FiDownload className="mr-2" />
-              Download PDF
+              <span className="relative flex items-center gap-2 text-sm">
+                <FiDownload className="w-4 h-4 text-purple-600 transition-transform duration-300 group-hover:scale-110" />
+                <span className="tracking-normal">Download PDF</span>
+              </span>
             </button>
             <button
               onClick={() => setIsEditMode(true)}
-              className="flex items-center px-5 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition duration-300"
+              className="relative inline-flex items-center justify-center overflow-hidden rounded border border-yellow-500 bg-transparent px-5 py-2 font-medium text-yellow-600 shadow-sm transition-all duration-300 hover:bg-yellow-50 hover:shadow-md hover:-translate-y-0.25 focus:outline-none focus:ring-2 focus:ring-yellow-100 focus:ring-offset-2 active:translate-y-0"
             >
-              <FiEdit className="mr-2" />
-              Edit PDF
+              <span className="relative flex items-center gap-2 text-sm">
+                <FiEdit className="w-4 h-4 text-yellow-600 transition-transform duration-300 group-hover:scale-110" />
+                <span className="tracking-normal">Edit PDF</span>
+              </span>
             </button>
           </div>
         </>

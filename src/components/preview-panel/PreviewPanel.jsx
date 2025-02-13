@@ -17,7 +17,7 @@ const PreviewPanel = ({
     templateComponents[currentTemplate] || templateComponents["single-column"];
 
   return (
-    <div className="bg-gray-100 p-6 rounded-lg shadow-md h-full w-full overflow-hidden">
+    <div className="bg-gray-100 p-0 rounded-lg shadow-md h-full w-full overflow-hidden">
       <div
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
@@ -27,7 +27,7 @@ const PreviewPanel = ({
           color: customizations.textColor,
           backgroundColor: customizations.backgroundColor,
         }}
-        className="p-6 rounded-lg shadow-inner h-[calc(100%-60px)] overflow-y-auto overflow-x-hidden"
+        className="p-0 rounded-lg shadow-inner h-[calc(100%-60px)] overflow-y-auto overflow-x-hidden"
       >
         {contextMenu && !finalMode && (
           <ContextMenu
