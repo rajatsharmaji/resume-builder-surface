@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import PropTypes from "prop-types";
-import { FiUser, FiEdit2, FiStar } from "react-icons/fi"; // Replaced FiSparkles with FiStar
+import { FiUser, FiEdit2, FiZap } from "react-icons/fi";
 import { ResumeContext } from "../../context/resume-context";
 import Loader from "../common/Loader";
 
@@ -78,7 +78,7 @@ const AboutSection = ({ sectionId, finalMode = false }) => {
               <Loader size="sm" />
             ) : (
               <>
-                <FiStar className="w-4 h-4" />
+                <FiZap className="w-4 h-4" />
                 <span>AI Enhance</span>
               </>
             )}
