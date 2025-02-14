@@ -185,6 +185,23 @@ const TemplatePanel = ({ applyTemplate, customizations }) => {
       preview: FiCloud,
       badges: ["Modern", "Interactive", "Unique Design"],
     },
+    {
+      id: "modern-single-column-cv",
+      name: "Modern Single Column CV",
+      sections: 5,
+      features: [
+        "Visual Timeline",
+        "Project Highlights",
+        "Skill Graphs",
+        "Integrated Portfolio",
+      ],
+      description:
+        "A creative résumé design that seamlessly integrates project showcases with a professional CV layout, perfect for developers who want to highlight both technical skills and creative flair.",
+      color: "bg-gradient-to-br from-pink-50 to-red-50",
+      icon: FiStar,
+      preview: FiCloud,
+      badges: ["Modern", "Interactive", "Unique Design"],
+    },
   ];
 
   return (
