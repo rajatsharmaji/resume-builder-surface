@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import useResume from "../hooks/useResume";
 import ElementsPanel from "../components/left-panel/ElementsPanel";
 import LayersPanel from "../components/left-panel/LayersPanel";
@@ -16,9 +16,11 @@ import {
   FiX,
 } from "react-icons/fi";
 import { MdFlashOn, MdSettings } from "react-icons/md";
+import { ResumeContext } from "../context/resume-context";
 
 const ResumeBuilder = () => {
   const { sections, addSection, moveSection, removeSection } = useResume();
+  const { sectionsData } = useContext(ResumeContext); // Access the global section data
   const [contextMenu, setContextMenu] = useState(null);
   const resumeRef = useRef(null);
 
@@ -140,15 +142,17 @@ const ResumeBuilder = () => {
     if (!finalMode) setContextMenu({ x: e.pageX, y: e.pageY, sectionId: id });
   };
 
-  // When "Generate" is clicked, log all resume details as JSON
-  // and then switch to preview (final) mode.
+  // When "Generate" is clicked, log each section's data from the context and then toggle modes.
   const handleGenerate = () => {
-    const resumeData = {
-      sections,
-      customizations,
-    };
-    console.log("Generated Resume Data:", JSON.stringify(resumeData, null, 2));
-    setFinalMode(true);
+    sections.forEach((section) => {
+      // Get section data from ResumeContext using section id
+      const data = sectionsData[section.id] || {};
+      console.log(
+        `Section Data for ${section.type} (ID: ${section.id}):`,
+        data
+      );
+    });
+    setFinalMode(!finalMode);
   };
 
   return (
