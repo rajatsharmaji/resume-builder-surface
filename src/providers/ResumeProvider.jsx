@@ -1,11 +1,8 @@
-/* eslint-disable react/prop-types */
-// src/context/resume-context.js
 import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import { ResumeContext } from "../context/resume-context";
 
-// Provider component
 const ResumeProvider = ({ children }) => {
-  // Retrieve data from localStorage or initialize with default values
   const initialSections = JSON.parse(
     localStorage.getItem("resumeSections")
   ) || [
@@ -21,18 +18,14 @@ const ResumeProvider = ({ children }) => {
   const initialSectionsData =
     JSON.parse(localStorage.getItem("resumeSectionsData")) || {};
 
-  // State for sections and their content
   const [sections, setSections] = useState(initialSections);
   const [sectionsData, setSectionsData] = useState(initialSectionsData);
 
-  // Save sections and sectionsData to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("resumeSections", JSON.stringify(sections));
     localStorage.setItem("resumeSectionsData", JSON.stringify(sectionsData));
   }, [sections, sectionsData]);
 
-  // Add a new section
-  // Updated to optionally accept an insertion index.
   const addSection = (type, insertIndex) => {
     const newSection = { id: Date.now(), type };
     setSections((prev) => {
@@ -49,7 +42,6 @@ const ResumeProvider = ({ children }) => {
     }));
   };
 
-  // Move a section to a new position
   const moveSection = (draggedId, targetIndex) => {
     setSections((prev) => {
       const draggedIndex = prev.findIndex((s) => s.id === draggedId);
@@ -62,7 +54,6 @@ const ResumeProvider = ({ children }) => {
     });
   };
 
-  // Remove a section
   const removeSection = (id) => {
     setSections((prev) => prev.filter((section) => section.id !== id));
     setSectionsData((prev) => {
@@ -72,7 +63,6 @@ const ResumeProvider = ({ children }) => {
     });
   };
 
-  // Update the content of a section
   const updateSectionContent = (id, content) => {
     setSectionsData((prev) => ({
       ...prev,
@@ -83,7 +73,6 @@ const ResumeProvider = ({ children }) => {
     }));
   };
 
-  // Provide the state and functions to the context
   const value = {
     sections,
     sectionsData,
@@ -96,6 +85,10 @@ const ResumeProvider = ({ children }) => {
   return (
     <ResumeContext.Provider value={value}>{children}</ResumeContext.Provider>
   );
+};
+
+ResumeProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default ResumeProvider;

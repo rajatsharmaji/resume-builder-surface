@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useContext, useCallback } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import useResume from "../hooks/useResume";
 import ElementsPanel from "../components/left-panel/ElementsPanel";
 import LayersPanel from "../components/left-panel/LayersPanel";
@@ -20,154 +20,20 @@ import { ResumeContext } from "../context/resume-context";
 import ResumeGenerator from "../components/ResumeGenerator";
 import Loader from "../components/common/Loader";
 import axios from "axios";
+import { constructResumePayload } from "../utils/resumeUtils";
 
-// ─── CUSTOM HOOK: useResumeGeneration ─────────────────────────────
-// This hook encapsulates the business logic for constructing the resume payload and calling the API.
 const useResumeGeneration = () => {
   const { sectionsData } = useContext(ResumeContext);
   const [pdfDataUrl, setPdfDataUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const constructResumePayload = useCallback(() => {
-    const dataArray = Object.keys(sectionsData).map((key) => ({
-      id: key,
-      ...sectionsData[key],
-    }));
-
-    const resume = {};
-
-    // HEADER
-    const headerSection = dataArray.find((s) => !s.type || s.type === "header");
-    if (headerSection && headerSection.content) {
-      const names = headerSection.content.name.split(" ");
-      resume.firstName = names[0] || "";
-      resume.lastName = names.slice(1).join(" ") || "";
-      resume.email = headerSection.content.email || "";
-      resume.phone = headerSection.content.phone || "";
-      resume.website =
-        headerSection.content.linkedin || headerSection.content.github || "";
-      resume.links = {};
-      if (headerSection.content.linkedin) {
-        resume.links["LinkedIn"] = headerSection.content.linkedin;
-      }
-      if (headerSection.content.github) {
-        resume.links["GitHub"] = headerSection.content.github;
-      }
-    }
-
-    // ABOUT
-    const aboutSection = dataArray.find((s) => s.type === "about");
-    if (aboutSection && aboutSection.content) {
-      resume.about = aboutSection.content.about || "";
-    }
-
-    // EDUCATION
-    const educationSection = dataArray.find((s) => s.type === "education");
-    if (
-      educationSection &&
-      educationSection.content &&
-      educationSection.content.education
-    ) {
-      resume.education = educationSection.content.education.map((edu) => ({
-        institution: edu.school,
-        degree: edu.degree,
-        graduationDate: edu.year,
-        location: edu.location || "",
-        gpa: edu.gpa || "",
-      }));
-    } else {
-      resume.education = [];
-    }
-
-    // EXPERIENCE
-    const experienceSection = dataArray.find((s) => s.type === "experience");
-    if (
-      experienceSection &&
-      experienceSection.content &&
-      experienceSection.content.experience
-    ) {
-      resume.experience = experienceSection.content.experience.map((exp) => ({
-        company: exp.company,
-        position: exp.role,
-        startDate: exp.startDate || "",
-        endDate: exp.endDate || "",
-        location: exp.location || "",
-        details: exp.description ? [exp.description] : [],
-      }));
-    } else {
-      resume.experience = [];
-    }
-
-    // SKILLS
-    const skillsSection = dataArray.find((s) => s.type === "skills");
-    if (
-      skillsSection &&
-      skillsSection.content &&
-      skillsSection.content.skills
-    ) {
-      resume.skills = [
-        {
-          category: "Technical Skills",
-          skills: skillsSection.content.skills,
-        },
-      ];
-    } else {
-      resume.skills = [];
-    }
-
-    // PROJECTS
-    const projectsSection = dataArray.find((s) => s.type === "projects");
-    if (
-      projectsSection &&
-      projectsSection.content &&
-      projectsSection.content.projects
-    ) {
-      resume.projects = projectsSection.content.projects.map((proj) => ({
-        title: proj.title,
-        subtitle: "",
-        dateRange: "",
-        tools: [],
-        details: proj.description ? [proj.description] : [],
-        link: proj.link || "",
-      }));
-    } else {
-      resume.projects = [];
-    }
-
-    // CERTIFICATIONS mapped to awards
-    const certificationsSection = dataArray.find(
-      (s) => s.type === "certifications"
-    );
-    if (
-      certificationsSection &&
-      certificationsSection.content &&
-      certificationsSection.content.certifications
-    ) {
-      resume.awards = certificationsSection.content.certifications.map(
-        (cert) => ({
-          title: cert,
-          organization: "",
-          date: "",
-        })
-      );
-    } else {
-      resume.awards = [];
-    }
-
-    // Template from localStorage
-    const currentTemplate =
-      localStorage.getItem("selectedTemplate") || "default";
-    resume.template = currentTemplate;
-    return resume;
-  }, [sectionsData]);
-
   const generateResume = async () => {
     setIsLoading(true);
     setError(null);
     setPdfDataUrl(null);
 
-    const payload = constructResumePayload();
+    const payload = constructResumePayload(sectionsData);
     console.log("Generating resume with payload:", payload);
     try {
       const response = await axios.post(
@@ -316,11 +182,9 @@ const ResumeBuilder = () => {
     if (!finalMode) setContextMenu({ x: e.pageX, y: e.pageY, sectionId: id });
   };
 
-  // Use the custom hook to manage resume generation.
   const { pdfDataUrl, isLoading, error, generateResume, setPdfDataUrl } =
     useResumeGeneration();
 
-  // When "Generate" is clicked, log section data, call the API, and switch to preview mode.
   const handleGenerate = async () => {
     sections.forEach((section) => {
       const data = sectionsData[section.id] || {};
@@ -333,14 +197,12 @@ const ResumeBuilder = () => {
     setFinalMode(true);
   };
 
-  // Switch back to edit mode.
   const handleEdit = () => {
     setFinalMode(false);
   };
 
   return (
     <div className="flex h-screen overflow-hidden relative">
-      {/* Mobile Toggle Buttons */}
       <div className="md:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setShowLeftPanel(true)}
@@ -358,7 +220,6 @@ const ResumeBuilder = () => {
         </button>
       </div>
 
-      {/* Desktop Left Panel */}
       <div className="hidden md:flex flex-col w-64 border-r border-gray-200 p-4">
         <div className="mb-4 flex-1 overflow-y-auto">
           <ElementsPanel
@@ -375,7 +236,6 @@ const ResumeBuilder = () => {
         </div>
       </div>
 
-      {/* Mobile Left Panel */}
       {showLeftPanel && (
         <div className="md:hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40">
           <div className="absolute left-0 top-0 bottom-0 w-64 bg-white p-4 flex flex-col">
@@ -411,14 +271,12 @@ const ResumeBuilder = () => {
         </div>
       )}
 
-      {/* Main Preview Area */}
       <div
         className="flex-1 p-4 relative overflow-hidden w-full md:max-w-4xl mx-auto mt-12 md:mt-0"
         ref={resumeRef}
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
       >
-        {/* Header with Always-Visible Generate Button and (in preview mode) Edit Mode Button */}
         <div className="flex justify-between items-center mb-4 space-x-4">
           <h2 className="text-xl font-bold text-gray-800">
             {finalMode ? "Preview" : "Builder"}
@@ -476,7 +334,6 @@ const ResumeBuilder = () => {
         )}
       </div>
 
-      {/* Desktop Right Panel */}
       <div className="hidden md:block w-64 border-l border-gray-200 p-4 overflow-y-auto">
         <RightPanel
           customizations={customizations}
@@ -484,7 +341,6 @@ const ResumeBuilder = () => {
         />
       </div>
 
-      {/* Mobile Right Panel - Fixed */}
       {showRightPanel && (
         <div className="md:hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40">
           <div className="absolute right-0 top-0 bottom-0 w-64 bg-white p-4 flex flex-col">
