@@ -1,16 +1,155 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
 import { FiDownload, FiEdit } from "react-icons/fi";
-import Loader from "./common/Loader"; // Import your thunder loader here
+import Loader from "./common/Loader";
 import PdfPreviewer from "./PdfPreviewer";
 import PdfEditor from "./PdfEditor";
+import { ResumeContext } from "../context/resume-context";
 
 const ResumeGenerator = ({ className = "", disableDownload = true }) => {
+  const { sectionsData } = useContext(ResumeContext);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [pdfDataUrl, setPdfDataUrl] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+
+  // Construct the payload matching your sample data format and backend template.
+  const constructResumePayload = useCallback(() => {
+    // Convert the sectionsData object into an array.
+    const dataArray = Object.keys(sectionsData).map((key) => ({
+      id: key,
+      ...sectionsData[key],
+    }));
+
+    const resume = {};
+
+    // HEADER (assume header has no explicit type or type === "header")
+    const headerSection = dataArray.find((s) => !s.type || s.type === "header");
+    if (headerSection && headerSection.content) {
+      const names = headerSection.content.name.split(" ");
+      resume.firstName = names[0] || "";
+      resume.lastName = names.slice(1).join(" ") || "";
+      resume.email = headerSection.content.email || "";
+      resume.phone = headerSection.content.phone || "";
+      // Use linkedin as website if available; fallback to github.
+      resume.website =
+        headerSection.content.linkedin || headerSection.content.github || "";
+      // Also store links separately for the backend.
+      resume.links = {};
+      if (headerSection.content.linkedin) {
+        resume.links["LinkedIn"] = headerSection.content.linkedin;
+      }
+      if (headerSection.content.github) {
+        resume.links["GitHub"] = headerSection.content.github;
+      }
+    }
+
+    // ABOUT
+    const aboutSection = dataArray.find((s) => s.type === "about");
+    if (aboutSection && aboutSection.content) {
+      resume.about = aboutSection.content.about || "";
+    }
+
+    // EDUCATION
+    const educationSection = dataArray.find((s) => s.type === "education");
+    if (
+      educationSection &&
+      educationSection.content &&
+      educationSection.content.education
+    ) {
+      // Map each education item (sample uses "school", "degree", "year")
+      resume.education = educationSection.content.education.map((edu) => ({
+        institution: edu.school, // map "school" to "institution"
+        degree: edu.degree,
+        graduationDate: edu.year, // map "year" to graduationDate
+        location: edu.location || "",
+        gpa: edu.gpa || "",
+      }));
+    } else {
+      resume.education = [];
+    }
+
+    // EXPERIENCE
+    const experienceSection = dataArray.find((s) => s.type === "experience");
+    if (
+      experienceSection &&
+      experienceSection.content &&
+      experienceSection.content.experience
+    ) {
+      // Map each experience item. In your sample, each item has company, role, description.
+      resume.experience = experienceSection.content.experience.map((exp) => ({
+        company: exp.company,
+        position: exp.role, // map "role" to "position"
+        startDate: exp.startDate || "", // you may add these if available
+        endDate: exp.endDate || "",
+        location: exp.location || "",
+        details: exp.description ? [exp.description] : [],
+      }));
+    } else {
+      resume.experience = [];
+    }
+
+    // SKILLS
+    const skillsSection = dataArray.find((s) => s.type === "skills");
+    if (
+      skillsSection &&
+      skillsSection.content &&
+      skillsSection.content.skills
+    ) {
+      // Wrap the skills array in a group with a default category.
+      resume.skills = [
+        {
+          category: "Technical Skills",
+          skills: skillsSection.content.skills,
+        },
+      ];
+    } else {
+      resume.skills = [];
+    }
+
+    // PROJECTS
+    const projectsSection = dataArray.find((s) => s.type === "projects");
+    if (
+      projectsSection &&
+      projectsSection.content &&
+      projectsSection.content.projects
+    ) {
+      // Map each project. Your sample provides title, description, and link.
+      resume.projects = projectsSection.content.projects.map((proj) => ({
+        title: proj.title,
+        subtitle: "", // no subtitle provided
+        dateRange: "", // not provided
+        tools: [], // not provided
+        details: proj.description ? [proj.description] : [],
+        link: proj.link || "",
+      }));
+    } else {
+      resume.projects = [];
+    }
+
+    // CERTIFICATIONS mapped to awards (for backend template)
+    const certificationsSection = dataArray.find(
+      (s) => s.type === "certifications"
+    );
+    if (
+      certificationsSection &&
+      certificationsSection.content &&
+      certificationsSection.content.certifications
+    ) {
+      resume.awards = certificationsSection.content.certifications.map(
+        (cert) => ({
+          title: cert,
+          organization: "",
+          date: "",
+        })
+      );
+    } else {
+      resume.awards = [];
+    }
+
+    return resume;
+  }, [sectionsData]);
 
   useEffect(() => {
     if (!disableDownload && !pdfDataUrl && !isLoading) {
@@ -18,40 +157,20 @@ const ResumeGenerator = ({ className = "", disableDownload = true }) => {
         setIsLoading(true);
         setError(null);
 
+        // Build the payload with real data.
+        const payload = constructResumePayload();
+        console.log("Generating resume with payload:", payload);
+
         try {
           const response = await axios.post(
             "http://localhost:3008/api/v1/resume/generate",
-            {
-              firstName: "John",
-              lastName: "Doe",
-              email: "john.doe@example.com",
-              phone: "123-456-7890",
-              website: "https://johndoe.com",
-              education: [
-                {
-                  institution: "University of Example",
-                  degree: "Bachelor of Science in Computer Science",
-                  graduationDate: "May 2020",
-                  location: "City, Country",
-                  gpa: "3.8/4.0",
-                },
-              ],
-              experience: [
-                {
-                  company: "Tech Corp",
-                  position: "Software Engineer",
-                  startDate: "Jan 2021",
-                  endDate: "Present",
-                  location: "Remote",
-                  details: [
-                    "Developed scalable web applications using React and Node.js.",
-                    "Optimized database queries, reducing load times by 30%.",
-                  ],
-                },
-              ],
-            },
+            payload,
             { responseType: "arraybuffer" }
           );
+
+          if (response.status !== 200) {
+            throw new Error(`Unexpected response status: ${response.status}`);
+          }
 
           const pdfBlob = new Blob([response.data], {
             type: "application/pdf",
@@ -60,7 +179,18 @@ const ResumeGenerator = ({ className = "", disableDownload = true }) => {
           setPdfDataUrl(pdfUrl);
         } catch (err) {
           console.error("Error generating resume:", err);
-          setError("Failed to generate resume. Please try again.");
+          if (err.response && err.response.data) {
+            try {
+              const errorMsg = new TextDecoder("utf-8").decode(
+                err.response.data
+              );
+              setError(`Failed to generate resume: ${errorMsg}`);
+            } catch {
+              setError("Failed to generate resume. Please try again.");
+            }
+          } else {
+            setError("Failed to generate resume. Please try again.");
+          }
         } finally {
           setIsLoading(false);
         }
@@ -68,11 +198,10 @@ const ResumeGenerator = ({ className = "", disableDownload = true }) => {
 
       generateResume();
     }
-  }, [disableDownload, pdfDataUrl, isLoading]);
+  }, [disableDownload, pdfDataUrl, isLoading, constructResumePayload]);
 
   const handleDownload = () => {
     if (!pdfDataUrl) return;
-
     const link = document.createElement("a");
     link.href = pdfDataUrl;
     link.download = "resume.pdf";
