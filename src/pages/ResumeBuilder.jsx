@@ -24,6 +24,8 @@ const ResumeBuilder = () => {
   const [contextMenu, setContextMenu] = useState(null);
   const resumeRef = useRef(null);
 
+  const defaultTemplate = "deedy-cv";
+
   // Initialize customizations with a default template.
   const [customizations, setCustomizations] = useState({
     font: "Roboto, sans-serif",
@@ -33,16 +35,15 @@ const ResumeBuilder = () => {
     spacing: "1rem",
     textColor: "#000000",
     backgroundColor: "#ffffff",
-    template: "deedy-cv", // Default template
+    template: defaultTemplate,
   });
 
-  // On mount, check localStorage for a stored template.
   useEffect(() => {
     const storedTemplate = localStorage.getItem("selectedTemplate");
     if (storedTemplate) {
       setCustomizations((prev) => ({ ...prev, template: storedTemplate }));
     } else {
-      localStorage.setItem("selectedTemplate", customizations.template);
+      localStorage.setItem("selectedTemplate", defaultTemplate);
     }
   }, []);
 
