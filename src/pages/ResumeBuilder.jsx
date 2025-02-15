@@ -212,7 +212,7 @@ const ResumeBuilder = () => {
   };
 
   const handleEdit = () => {
-    setFinalMode(false);
+    setFinalMode(!finalMode);
   };
 
   return (
@@ -310,17 +310,16 @@ const ResumeBuilder = () => {
                 </span>
               )}
             </button>
-            {finalMode && (
-              <button
-                onClick={handleEdit}
-                className="relative inline-flex items-center justify-center rounded-lg border border-green-500 bg-transparent px-4 py-2 text-sm font-medium text-green-600 shadow-sm transition-all duration-300 hover:bg-green-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-100"
-              >
-                <span className="flex items-center gap-2">
-                  <MdFlashOn className="w-4 h-4" />
-                  <span>Edit Mode</span>
-                </span>
-              </button>
-            )}
+
+            <button
+              onClick={handleEdit}
+              className="relative inline-flex items-center justify-center rounded-lg border border-green-500 bg-transparent px-4 py-2 text-sm font-medium text-green-600 shadow-sm transition-all duration-300 hover:bg-green-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-100"
+            >
+              <span className="flex items-center gap-2">
+                <MdFlashOn className="w-4 h-4" />
+                <span>{finalMode ? "Edit Mode" : "Preview"}</span>
+              </span>
+            </button>
           </div>
         </div>
         {finalMode ? (

@@ -62,7 +62,7 @@ const ResumeGenerator = ({
         {error && <p className="text-red-500">{error}</p>}
       </div>
 
-      {pdfDataUrl && (
+      {pdfDataUrl ? (
         <>
           <div className="h-[calc(100vh-200px)]">
             {isEditMode ? (
@@ -116,6 +116,26 @@ const ResumeGenerator = ({
             )}
           </div>
         </>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+          <svg
+            className="w-12 h-12 text-blue-500 animate-pulse"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M13 2L3 14h7v8l7-12h-7z"
+            ></path>
+          </svg>
+          <p className="mt-4 text-lg font-medium text-blue-600 animate-pulse">
+            Generate the PDF first!
+          </p>
+        </div>
       )}
     </div>
   );
