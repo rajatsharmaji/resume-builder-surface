@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import PropTypes from "prop-types";
-import { FiUser, FiEdit2, FiZap } from "react-icons/fi";
+import { FiUser, FiEdit2, FiZap, FiDatabase } from "react-icons/fi";
+import axios from "axios";
 import { ResumeContext } from "../../context/resume-context";
 import Loader from "../common/Loader";
 
@@ -12,28 +13,27 @@ const AboutSection = ({ sectionId, finalMode = false }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
 
-  // Generate AI-powered about section
+  const sampleData =
+    "Passionate software engineer with expertise in full-stack development, cloud computing, and agile methodologies.";
+
+  const addSampleData = () => {
+    setAbout(sampleData);
+    updateSectionContent(sectionId, { about: sampleData });
+  };
+
   const generateAIContent = async () => {
     try {
       setIsGenerating(true);
       setError("");
-
-      // Simulated API call - replace with your actual API endpoint
-      const response = await new Promise((resolve) =>
-        setTimeout(
-          () =>
-            resolve({
-              data: {
-                content:
-                  "Experienced software engineer with 5+ years in full-stack development. Specialized in React, Node.js, and cloud technologies. Passionate about creating scalable solutions and mentoring junior developers. Strong advocate for clean code and agile practices.",
-              },
-            }),
-          1500
-        )
+      const response = await axios.post(
+        "http://localhost:3008/api/v1/ai/about",
+        {
+          text: about,
+        }
       );
-
-      setAbout(response.data.content);
-      updateSectionContent(sectionId, { about: response.data.content });
+      const result = response.data.result;
+      setAbout(result);
+      updateSectionContent(sectionId, { about: result });
     } catch (err) {
       console.error(err);
       setError("Failed to generate content. Please try again.");
@@ -70,6 +70,14 @@ const AboutSection = ({ sectionId, finalMode = false }) => {
 
         <div className="flex gap-2">
           <button
+            onClick={addSampleData}
+            className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-800"
+          >
+            <FiDatabase className="w-4 h-4" />
+            <span>Sample</span>
+          </button>
+
+          <button
             onClick={generateAIContent}
             disabled={isGenerating}
             className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50"
@@ -77,11 +85,9 @@ const AboutSection = ({ sectionId, finalMode = false }) => {
             {isGenerating ? (
               <Loader size="sm" />
             ) : (
-              <>
-                <FiZap className="w-4 h-4" />
-                <span>AI Enhance</span>
-              </>
+              <FiZap className="w-4 h-4" />
             )}
+            <span>AI Enhance</span>
           </button>
 
           <button
