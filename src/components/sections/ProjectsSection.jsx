@@ -1,14 +1,18 @@
 // src/components/ProjectsSection.jsx
-import { useContext, useState } from "react";
+import { useContext, useState, useCallback } from "react";
 import PropTypes from "prop-types";
-import { FiCode, FiLink, FiEdit2, FiZap } from "react-icons/fi"; // FiCode for project icon, FiZap for AI Enhance, FiEdit2 for editing, FiLink for link icon
+import { FiCode, FiLink, FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FaMagic } from "react-icons/fa";
+import { AiFillThunderbolt } from "react-icons/ai";
+import axios from "axios";
+import * as Yup from "yup";
 import { ResumeContext } from "../../context/resume-context";
 import Loader from "../common/Loader";
 
 const ProjectsSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);
 
-  // Initialize projects as an array.
+  // Compute initial projects data.
   const initialProjects = Array.isArray(
     sectionsData[sectionId]?.content?.projects
   )
@@ -22,64 +26,73 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState("");
+  // State for tracking which project description is being AI enhanced.
+  const [generatingDescIndex, setGeneratingDescIndex] = useState(null);
+
+  // Define suggestion keywords for project title.
+  const projectTitleSuggestions = [
+    "Portfolio Website",
+    "E-commerce Platform",
+    "Social Media App",
+    "Chat Application",
+    "Data Visualization Dashboard",
+  ];
+
+  // Yup validation schema for each project.
+  const projectEntrySchema = Yup.object().shape({
+    title: Yup.string().required("Project title is required"),
+    description: Yup.string()
+      .required("Project description is required")
+      .min(10, "Description must be at least 10 characters"),
+    link: Yup.string().url("Project link must be a valid URL").nullable(),
+  });
+  const projectSchema = Yup.array().of(projectEntrySchema);
 
   // Update a specific project entry.
-  const handleProjectChange = (index, field, value) => {
-    const newProjects = [...projects];
-    newProjects[index] = { ...newProjects[index], [field]: value };
-    setProjects(newProjects);
-  };
+  const handleProjectChange = useCallback((index, field, value) => {
+    setProjects((prev) => {
+      const newProjects = [...prev];
+      newProjects[index] = { ...newProjects[index], [field]: value };
+      return newProjects;
+    });
+  }, []);
 
-  // Save changes to the global context and exit edit mode.
-  const handleSave = () => {
-    updateSectionContent(sectionId, { projects });
-    setIsEditing(false);
-  };
-
-  // Add a new empty project entry (without toggling edit mode).
-  const handleAddMore = () => {
-    setProjects((prev) => [...prev, { title: "", description: "", link: "" }]);
-  };
-
-  // Simulated API call to generate AI-enhanced projects data.
-  const generateAIContent = async () => {
-    try {
-      setIsGenerating(true);
-      setError("");
-      // Simulated API call – replace with your actual endpoint.
-      const response = await new Promise((resolve) =>
-        setTimeout(
-          () =>
-            resolve({
-              data: {
-                projects: [
-                  {
-                    title: "Project Alpha",
-                    description:
-                      "A groundbreaking project integrating AI and machine learning to optimize workflows.",
-                    link: "https://alpha.example.com",
-                  },
-                  {
-                    title: "Project Beta",
-                    description:
-                      "An innovative web application built with React and Node.js, delivering seamless user experiences.",
-                    link: "https://beta.example.com",
-                  },
-                ],
-              },
-            }),
-          1500
-        )
-      );
-      setProjects(response.data.projects);
-      updateSectionContent(sectionId, { projects: response.data.projects });
-    } catch (err) {
-      console.error(err);
-      setError("Failed to generate AI projects data. Please try again.");
-    } finally {
-      setIsGenerating(false);
+  // Remove a project entry.
+  const handleRemoveEntry = useCallback((index, e) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
     }
-  };
+    setProjects((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  // Save changes after validation.
+  const handleSave = useCallback(() => {
+    projectSchema
+      .validate(projects, { abortEarly: false })
+      .then(() => {
+        updateSectionContent(sectionId, { projects });
+        setIsEditing(false);
+        setError("");
+      })
+      .catch((validationError) => {
+        if (
+          validationError.inner &&
+          Array.isArray(validationError.inner) &&
+          validationError.inner.length > 0
+        ) {
+          setError(validationError.inner[0].message);
+        } else {
+          setError(validationError.message);
+        }
+      });
+  }, [projects, projectSchema, updateSectionContent, sectionId]);
+
+  // Add a new project entry.
+  const handleAddMore = useCallback(() => {
+    setError("");
+    setProjects((prev) => [...prev, { title: "", description: "", link: "" }]);
+  }, []);
 
   // Simulated API call to fetch projects data when dragging the component.
   const fetchProjectsData = async () => {
@@ -115,11 +128,61 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
     }
   };
 
-  // Final (preview) mode: read-only display.
+  // Handle inserting sample project description.
+  const handleProjectSampleDesc = useCallback((index, e) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    const sampleDesc =
+      "Developed innovative solutions that streamline processes and boost performance.";
+    setProjects((prev) => {
+      const newProjects = [...prev];
+      newProjects[index] = { ...newProjects[index], description: sampleDesc };
+      return newProjects;
+    });
+  }, []);
+
+  // Handle calling AI to enhance project description.
+  const handleProjectAIDesc = useCallback(
+    async (index, e) => {
+      if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+      try {
+        setGeneratingDescIndex(index);
+        setError("");
+        // Simulated API call – replace with your actual endpoint.
+        const response = await axios.post(
+          "http://localhost:3008/api/v1/ai/project-description",
+          {
+            text: projects[index].description,
+          }
+        );
+        setProjects((prev) => {
+          const newProjects = [...prev];
+          newProjects[index] = {
+            ...newProjects[index],
+            description: response.data.result,
+          };
+          return newProjects;
+        });
+      } catch (err) {
+        console.error(err);
+        setError("Failed to enhance project description. Please try again.");
+      } finally {
+        setGeneratingDescIndex(null);
+      }
+    },
+    [projects]
+  );
+
+  // Final (read-only) mode view.
   if (finalMode) {
     return (
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold text-gray-800 mb-2">Projects</h3>
+      <div className="mb-6 p-6 bg-white shadow rounded">
+        <h3 className="text-2xl font-semibold text-gray-800 mb-4">Projects</h3>
         {projects.map((proj, index) => (
           <div key={index} className="mb-4">
             <p className="text-gray-700">
@@ -147,50 +210,48 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
     );
   }
 
-  // Editable / View mode.
+  // Editable mode view.
   return (
     <div
-      className="relative group border-l-4 border-blue-500 bg-gray-50 rounded-lg p-6 mb-6 transition-all hover:bg-gray-50/80"
-      draggable
-      onDragStart={fetchProjectsData} // Dragging auto-fills projects data.
+      className="relative group border-l-4 border-blue-500 bg-gray-50 rounded-lg p-6 mb-6 transition-transform duration-200 hover:bg-gray-50/80"
+      draggable={!isEditing}
+      onDragStart={!isEditing ? fetchProjectsData : undefined}
     >
-      {/* Header Row with Icon, Title, and Action Buttons */}
-      <div className="flex justify-between items-center mb-4">
+      {/* Loader overlay when fetching projects data */}
+      {isFetching && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
+          <Loader size="lg" />
+        </div>
+      )}
+      <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <FiCode className="w-6 h-6 text-blue-500" />
-          <h3 className="text-lg font-semibold text-gray-800">Projects</h3>
+          <FiCode className="w-7 h-7 text-blue-500" />
+          <h3 className="text-2xl font-semibold text-gray-800">Projects</h3>
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={generateAIContent}
-            disabled={isGenerating || isFetching}
-            className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50"
-          >
-            {isGenerating ? (
-              <Loader size="sm" />
-            ) : (
-              <>
-                <FiZap className="w-4 h-4" />
-                <span>AI Enhance</span>
-              </>
-            )}
-          </button>
           <button
             onClick={() => setIsEditing(!isEditing)}
             className="text-gray-500 hover:text-gray-700"
           >
-            <FiEdit2 className="w-5 h-5" />
+            <FiEdit2 className="w-6 h-6" />
           </button>
         </div>
       </div>
 
-      {error && <div className="mb-3 text-sm text-red-600">{error}</div>}
-
-      {/* Content Area */}
       {isEditing ? (
-        <div>
+        <div className="relative space-y-8">
           {projects.map((proj, index) => (
-            <div key={index} className="mb-4 border-b pb-4">
+            <div key={index} className="mb-8 border-b pb-4 relative">
+              {projects.length > 1 && (
+                <button
+                  type="button"
+                  onClick={(e) => handleRemoveEntry(index, e)}
+                  className="absolute top-0 right-0 p-2 text-red-500 hover:text-red-700 transition-colors"
+                >
+                  <FiTrash2 className="w-5 h-5" />
+                </button>
+              )}
+              {/* Project Title with Suggestions */}
               <div className="mb-2">
                 <label className="block text-sm font-medium text-gray-600 mb-1">
                   Project Title
@@ -198,27 +259,61 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
                 <input
                   type="text"
                   placeholder="Enter project title"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150"
                   value={proj.title}
                   onChange={(e) =>
                     handleProjectChange(index, "title", e.target.value)
                   }
+                  list={`project-title-suggestions-${index}`}
                 />
+                <datalist id={`project-title-suggestions-${index}`}>
+                  {projectTitleSuggestions.map((title, i) => (
+                    <option key={i} value={title} />
+                  ))}
+                </datalist>
               </div>
+              {/* Project Description */}
               <div className="mb-2">
                 <label className="block text-sm font-medium text-gray-600 mb-1">
                   Project Description
                 </label>
                 <textarea
                   placeholder="Enter project description"
-                  className="w-full h-32 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="w-full h-32 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition duration-150"
                   value={proj.description}
                   onChange={(e) =>
                     handleProjectChange(index, "description", e.target.value)
                   }
                 ></textarea>
               </div>
-              <div>
+              {/* Sample and AI Enhance buttons for project description */}
+              <div className="flex gap-3 mt-3">
+                <button
+                  type="button"
+                  onClick={(e) => handleProjectSampleDesc(index, e)}
+                  className="flex items-center gap-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-md shadow-sm hover:bg-gray-300 transition-colors text-sm"
+                >
+                  <FaMagic className="w-4 h-4" />
+                  <span>Sample</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => handleProjectAIDesc(index, e)}
+                  disabled={generatingDescIndex === index}
+                  className="flex items-center gap-1 px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600 transition-colors text-sm disabled:opacity-50"
+                >
+                  {generatingDescIndex === index ? (
+                    <Loader size="sm" />
+                  ) : (
+                    <>
+                      <AiFillThunderbolt className="w-4 h-4" />
+                      <span>AI Enhance</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              {/* Project Link */}
+              <div className="mt-2">
                 <label className="block text-sm font-medium text-gray-600 mb-1 flex items-center gap-2">
                   <FiLink size={16} className="text-gray-500" />
                   Project Link (optional)
@@ -226,7 +321,7 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
                 <input
                   type="url"
                   placeholder="https://example.com"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150"
                   value={proj.link}
                   onChange={(e) =>
                     handleProjectChange(index, "link", e.target.value)
@@ -235,12 +330,26 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
               </div>
             </div>
           ))}
-          <button
-            onClick={handleSave}
-            className="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          >
-            Save Changes
-          </button>
+          {/* Error Message placed above the Save Changes button */}
+          {error && (
+            <div className="mt-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded shadow">
+              {error}
+            </div>
+          )}
+          <div className="flex gap-4">
+            <button
+              onClick={handleSave}
+              className="mt-3 px-6 py-3 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition-colors"
+            >
+              Save Changes
+            </button>
+            <button
+              onClick={handleAddMore}
+              className="mt-3 px-6 py-3 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition-colors"
+            >
+              Add More
+            </button>
+          </div>
         </div>
       ) : (
         <div className="cursor-text" onClick={() => setIsEditing(true)}>
@@ -273,16 +382,6 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
           </div>
         </div>
       )}
-
-      {/* "Add More" Button (Always Visible) */}
-      <div className="mt-4">
-        <button
-          onClick={handleAddMore}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-        >
-          Add More
-        </button>
-      </div>
     </div>
   );
 };
