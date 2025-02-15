@@ -224,7 +224,7 @@ const CertificationsSection = ({ sectionId, finalMode = false }) => {
             ))}
           </ul>
           <div className="mt-2 text-sm text-gray-400">
-            Click to edit – Drag to auto-fill certifications data available
+            Click to edit – Drag to auto-fill sample data
           </div>
         </div>
       )}

@@ -282,7 +282,7 @@ const SkillsSection = ({ sectionId, finalMode = false }) => {
             ))}
           </ul>
           <div className="mt-2 text-sm text-gray-400">
-            Click to edit – Drag to auto-fill skills data available
+            Click to edit – Drag to auto-fill sample data
           </div>
         </div>
       )}

@@ -161,7 +161,7 @@ const FooterSection = ({ sectionId, finalMode = false }) => {
             {note || "Click to add a note"}
           </p>
           <div className="mt-2 text-center text-sm text-gray-400">
-            Click to edit – Drag to auto-fill footer data available
+            Click to edit – Drag to auto-fill sample data
           </div>
         </div>
       )}

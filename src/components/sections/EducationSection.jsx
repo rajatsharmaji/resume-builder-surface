@@ -570,7 +570,7 @@ const EducationSection = ({ sectionId, finalMode = false }) => {
             </div>
           ))}
           <div className="mt-2 text-sm text-gray-400">
-            Click to edit – Drag to auto-fill college data available
+            Click to edit – Drag to auto-fill sample data
           </div>
         </div>
       )}
