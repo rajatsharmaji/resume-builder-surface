@@ -25,6 +25,7 @@ import { constructResumePayload } from "../utils/resumeUtils";
 const useResumeGeneration = () => {
   const { sectionsData } = useContext(ResumeContext);
   const [pdfDataUrl, setPdfDataUrl] = useState(null);
+  const [htmlData, setHtmlData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -37,18 +38,16 @@ const useResumeGeneration = () => {
     console.log("Generating resume with payload:", payload);
     try {
       const response = await axios.post(
-        "http://localhost:3008/api/v1/resume/generate",
-        payload,
-        { responseType: "arraybuffer" }
+        "http://localhost:3008/api/v1/resume/generate-resume",
+        payload
       );
-
-      if (response.status !== 200) {
-        throw new Error(`Unexpected response status: ${response.status}`);
-      }
-
-      const pdfBlob = new Blob([response.data], { type: "application/pdf" });
+      const { pdf, html } = response.data;
+      const pdfBuffer = Uint8Array.from(atob(pdf), (c) => c.charCodeAt(0));
+      const pdfBlob = new Blob([pdfBuffer], { type: "application/pdf" });
       const pdfUrl = URL.createObjectURL(pdfBlob);
       setPdfDataUrl(pdfUrl);
+      setHtmlData(html);
+      console.log(html);
     } catch (err) {
       console.error("Error generating resume:", err);
       setError("Failed to generate resume. Please try again.");
@@ -57,7 +56,15 @@ const useResumeGeneration = () => {
     }
   };
 
-  return { pdfDataUrl, isLoading, error, generateResume, setPdfDataUrl };
+  return {
+    pdfDataUrl,
+    htmlData,
+    isLoading,
+    error,
+    generateResume,
+    setPdfDataUrl,
+    setHtmlData,
+  };
 };
 
 const ResumeBuilder = () => {
@@ -182,8 +189,15 @@ const ResumeBuilder = () => {
     if (!finalMode) setContextMenu({ x: e.pageX, y: e.pageY, sectionId: id });
   };
 
-  const { pdfDataUrl, isLoading, error, generateResume, setPdfDataUrl } =
-    useResumeGeneration();
+  const {
+    pdfDataUrl,
+    htmlData,
+    isLoading,
+    error,
+    generateResume,
+    setPdfDataUrl,
+    setHtmlData,
+  } = useResumeGeneration();
 
   const handleGenerate = async () => {
     sections.forEach((section) => {
@@ -312,9 +326,11 @@ const ResumeBuilder = () => {
         {finalMode ? (
           <ResumeGenerator
             pdfDataUrl={pdfDataUrl}
+            htmlData={htmlData}
             isLoading={isLoading}
             error={error}
             setPdfDataUrl={setPdfDataUrl}
+            setHtmlData={setHtmlData}
             disableDownload={false}
           />
         ) : (
