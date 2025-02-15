@@ -47,11 +47,8 @@ const PdfEditor = ({ htmlData, setHtmlData, onCancel }) => {
       <div style={styles.toolbar}>
         <div style={styles.toolbarLeft}>
           <button onClick={onCancel} style={styles.button}>
-            ← Back to Preview
+            ← Preview
           </button>
-        </div>
-        <div style={styles.toolbarRight}>
-          <span style={styles.title}>Advanced Document Editor</span>
         </div>
       </div>
       <div style={styles.editorWrapper}>
