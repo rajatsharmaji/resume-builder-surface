@@ -5,13 +5,12 @@ import { FiBook, FiEdit2, FiTrash2 } from "react-icons/fi";
 import * as Yup from "yup";
 import { ResumeContext } from "../../context/resume-context";
 import Loader from "../common/Loader";
+import ConfirmationModal from "../common/ConfirmationModal";
 
 const EducationSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);
 
   // Compute initial education data.
-  // If education exists as an array use it; if it exists as an object, wrap it in an array;
-  // otherwise, use a default empty object with all fields.
   const initialEducation = sectionsData[sectionId]?.content.education;
   const computedInitialEducation = Array.isArray(initialEducation)
     ? initialEducation
@@ -36,8 +35,9 @@ const EducationSection = ({ sectionId, finalMode = false }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isFetchingCollege, setIsFetchingCollege] = useState(false);
   const [error, setError] = useState("");
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
-  // Suggestions for school and degree (for auto-suggest via datalist).
+  // Suggestions for school and degree.
   const schoolSuggestions = useMemo(
     () => [
       "Harvard University",
@@ -242,6 +242,22 @@ const EducationSection = ({ sectionId, finalMode = false }) => {
     }
   };
 
+  // Handle drag-to-auto-fill with confirmation modal.
+  const handleDragStart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowConfirmation(true);
+  };
+
+  const confirmAutoFill = () => {
+    setShowConfirmation(false);
+    fetchCollegeData();
+  };
+
+  const cancelAutoFill = () => {
+    setShowConfirmation(false);
+  };
+
   // Final (read-only) mode view.
   if (finalMode) {
     return (
@@ -284,9 +300,8 @@ const EducationSection = ({ sectionId, finalMode = false }) => {
     <div
       className="relative group border-l-4 border-blue-500 bg-white shadow-lg rounded-lg p-8 mb-6 transition-transform duration-200 hover:scale-105"
       draggable={!isEditing}
-      onDragStart={!isEditing ? fetchCollegeData : undefined}
+      onDragStart={!isEditing ? handleDragStart : undefined}
     >
-      {/* Loader overlay when fetching college data */}
       {isFetchingCollege && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
           <Loader size="lg" />
@@ -321,7 +336,7 @@ const EducationSection = ({ sectionId, finalMode = false }) => {
                   <FiTrash2 className="w-5 h-5" />
                 </button>
               )}
-              {/* School Field with Datalist Suggestions */}
+              {/* School Field */}
               <div className="mb-2">
                 <label className="block text-sm font-medium text-gray-600 mb-1">
                   School
@@ -342,7 +357,7 @@ const EducationSection = ({ sectionId, finalMode = false }) => {
                   ))}
                 </datalist>
               </div>
-              {/* Degree Field with Datalist Suggestions */}
+              {/* Degree Field */}
               <div className="mb-2">
                 <label className="block text-sm font-medium text-gray-600 mb-1">
                   Degree / Course
@@ -420,7 +435,7 @@ const EducationSection = ({ sectionId, finalMode = false }) => {
                   </span>
                 </label>
               </div>
-              {/* End Date: Only if not currently studying */}
+              {/* End Date (if not currently studying) */}
               {!entry.isCurrent && (
                 <div className="mb-2 grid grid-cols-2 gap-4">
                   <div>
@@ -499,7 +514,7 @@ const EducationSection = ({ sectionId, finalMode = false }) => {
             </div>
           ))}
 
-          {/* Error Message at the Bottom */}
+          {/* Error Message above the action buttons */}
           {error && (
             <div className="mt-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded shadow">
               {error}
@@ -509,7 +524,7 @@ const EducationSection = ({ sectionId, finalMode = false }) => {
           <div className="flex gap-4">
             <button
               onClick={handleSave}
-              className="mt-3 px-6 py-3 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition-colors"
+              className="mt-3 px-6 py-3 bg-green-500 text-white rounded-md shadow hover:bg-green-600 transition-colors"
             >
               Save Changes
             </button>
@@ -542,7 +557,7 @@ const EducationSection = ({ sectionId, finalMode = false }) => {
                         ? "Present"
                         : entry.endMonth && entry.endYear
                         ? `${entry.endMonth} ${entry.endYear}`
-                        : "N/A"
+                        : "Click to add your study duration"
                     }`
                   : "Click to add your study duration"}
               </p>
@@ -559,6 +574,14 @@ const EducationSection = ({ sectionId, finalMode = false }) => {
           </div>
         </div>
       )}
+
+      {/* Global confirmation modal rendered via portal */}
+      <ConfirmationModal
+        isOpen={showConfirmation}
+        message="This will replace all previous data with sample data. Do you want to proceed?"
+        onConfirm={confirmAutoFill}
+        onCancel={cancelAutoFill}
+      />
     </div>
   );
 };

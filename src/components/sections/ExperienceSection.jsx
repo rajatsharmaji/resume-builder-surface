@@ -8,6 +8,7 @@ import axios from "axios";
 import * as Yup from "yup";
 import { ResumeContext } from "../../context/resume-context";
 import Loader from "../common/Loader";
+import ConfirmationModal from "../common/ConfirmationModal";
 
 const ExperienceSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);
@@ -55,6 +56,7 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
   const [isFetchingExperience, setIsFetchingExperience] = useState(false);
   const [error, setError] = useState("");
   const [generatingDescIndex, setGeneratingDescIndex] = useState(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   // Yup validation schema for each experience entry with custom date order validation
   const experienceEntrySchema = Yup.object()
@@ -185,7 +187,6 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
       })
       .catch((validationError) => {
         if (validationError.inner && validationError.inner.length > 0) {
-          // Only take the first error message.
           setError(validationError.inner[0].message);
         } else {
           setError(validationError.message);
@@ -312,6 +313,22 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
     [experience]
   );
 
+  // Handle drag to auto-fill sample data with confirmation modal.
+  const handleDragStart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowConfirmation(true);
+  };
+
+  const confirmAutoFill = () => {
+    setShowConfirmation(false);
+    fetchExperienceData();
+  };
+
+  const cancelAutoFill = () => {
+    setShowConfirmation(false);
+  };
+
   // Final (read-only) mode view.
   if (finalMode) {
     return (
@@ -353,8 +370,14 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
     <div
       className="relative group border-l-4 border-blue-500 bg-white shadow-lg rounded-lg p-8 mb-6 transition-transform duration-200 hover:scale-105"
       draggable={!isEditing}
-      onDragStart={!isEditing ? fetchExperienceData : undefined}
+      onDragStart={!isEditing ? handleDragStart : undefined}
     >
+      {isFetchingExperience && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
+          <Loader size="lg" />
+        </div>
+      )}
+
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
           <FiBriefcase className="w-7 h-7 text-blue-500" />
@@ -376,17 +399,10 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
         </div>
       </div>
 
-      {isFetchingExperience && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
-          <Loader size="lg" />
-        </div>
-      )}
-
       {isEditing ? (
         <div className="relative space-y-8">
           {experience.map((entry, index) => (
             <div key={index} className="mb-8 border-b pb-4 relative">
-              {/* Remove Experience Icon */}
               {experience.length > 1 && (
                 <button
                   type="button"
@@ -396,8 +412,6 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
                   <FiTrash2 className="w-5 h-5" />
                 </button>
               )}
-
-              {/* Company Field */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-600 mb-1">
                   Company Name
@@ -418,8 +432,6 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
                   ))}
                 </datalist>
               </div>
-
-              {/* Role Field */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-600 mb-1">
                   Role
@@ -440,8 +452,6 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
                   ))}
                 </datalist>
               </div>
-
-              {/* Start Date Fields */}
               <div className="mb-4 grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -482,8 +492,6 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
                   </select>
                 </div>
               </div>
-
-              {/* Conditionally Render End Date Fields */}
               {!entry.isCurrent && (
                 <div className="mb-4 grid grid-cols-2 gap-4">
                   <div>
@@ -526,8 +534,6 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
                   </div>
                 </div>
               )}
-
-              {/* Currently Working Here Checkbox */}
               <div className="mb-4">
                 <label className="inline-flex items-center">
                   <input
@@ -543,8 +549,6 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
                   </span>
                 </label>
               </div>
-
-              {/* Description Field with Sample & AI Enhance Buttons */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-600 mb-1">
                   Description
@@ -585,14 +589,11 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
               </div>
             </div>
           ))}
-
-          {/* Error Message above the Save button */}
           {error && (
             <div className="mt-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded shadow">
               {error}
             </div>
           )}
-
           <div className="flex gap-4">
             <button
               type="button"
@@ -611,9 +612,8 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
           </div>
         </div>
       ) : (
-        // Preview view (click to edit)
         <div
-          className="cursor-text"
+          className="prose max-w-none cursor-text"
           onClick={(e) => {
             e.stopPropagation();
             setIsEditing(true);
@@ -651,6 +651,13 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
           </div>
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={showConfirmation}
+        message="This will replace all previous data with sample data. Do you want to proceed?"
+        onConfirm={confirmAutoFill}
+        onCancel={cancelAutoFill}
+      />
     </div>
   );
 };

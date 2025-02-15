@@ -8,6 +8,7 @@ import axios from "axios";
 import * as Yup from "yup";
 import { ResumeContext } from "../../context/resume-context";
 import Loader from "../common/Loader";
+import ConfirmationModal from "../common/ConfirmationModal";
 
 const ProjectsSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);
@@ -27,6 +28,7 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
   const [error, setError] = useState("");
   // Track which project description is currently being AI enhanced.
   const [generatingDescIndex, setGeneratingDescIndex] = useState(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   // Suggested project title keywords.
   const projectTitleSuggestions = [
@@ -175,6 +177,22 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
     [projects]
   );
 
+  // Handle drag-to-auto-fill with confirmation modal.
+  const handleDragStart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowConfirmation(true);
+  };
+
+  const confirmAutoFill = () => {
+    setShowConfirmation(false);
+    fetchProjectsData();
+  };
+
+  const cancelAutoFill = () => {
+    setShowConfirmation(false);
+  };
+
   // Final (read-only) mode view.
   if (finalMode) {
     return (
@@ -212,7 +230,7 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
     <div
       className="relative group border-l-4 border-blue-500 bg-white shadow-lg rounded-lg p-8 mb-6 transition-transform duration-200 hover:scale-105"
       draggable={!isEditing}
-      onDragStart={!isEditing ? fetchProjectsData : undefined}
+      onDragStart={!isEditing ? handleDragStart : undefined}
     >
       {/* Loader overlay when fetching projects data */}
       {isFetching && (
@@ -327,7 +345,7 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
               </div>
             </div>
           ))}
-          {/* Error Message above the Save Changes button */}
+          {/* Error Message above the action buttons */}
           {error && (
             <div className="mt-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded shadow">
               {error}
@@ -336,7 +354,7 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
           <div className="flex gap-4">
             <button
               onClick={handleSave}
-              className="mt-3 px-6 py-3 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition-colors"
+              className="mt-3 px-6 py-3 bg-green-500 text-white rounded-md shadow hover:bg-green-600 transition-colors"
             >
               Save Changes
             </button>
@@ -379,6 +397,14 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
           </div>
         </div>
       )}
+
+      {/* Global confirmation modal rendered via portal */}
+      <ConfirmationModal
+        isOpen={showConfirmation}
+        message="This will replace all previous data with sample data. Do you want to proceed?"
+        onConfirm={confirmAutoFill}
+        onCancel={cancelAutoFill}
+      />
     </div>
   );
 };
