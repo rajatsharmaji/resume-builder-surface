@@ -23,13 +23,12 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
 
   const [projects, setProjects] = useState(initialProjects);
   const [isEditing, setIsEditing] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState("");
-  // State for tracking which project description is being AI enhanced.
+  // Track which project description is currently being AI enhanced.
   const [generatingDescIndex, setGeneratingDescIndex] = useState(null);
 
-  // Define suggestion keywords for project title.
+  // Suggested project title keywords.
   const projectTitleSuggestions = [
     "Portfolio Website",
     "E-commerce Platform",
@@ -66,7 +65,7 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
     setProjects((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  // Save changes after validation.
+  // Save changes after validating with Yup.
   const handleSave = useCallback(() => {
     projectSchema
       .validate(projects, { abortEarly: false })
@@ -94,7 +93,7 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
     setProjects((prev) => [...prev, { title: "", description: "", link: "" }]);
   }, []);
 
-  // Simulated API call to fetch projects data when dragging the component.
+  // Simulated API call to fetch projects data on drag.
   const fetchProjectsData = async () => {
     try {
       setIsFetching(true);
@@ -156,9 +155,7 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
         // Simulated API call – replace with your actual endpoint.
         const response = await axios.post(
           "http://localhost:3008/api/v1/ai/project-description",
-          {
-            text: projects[index].description,
-          }
+          { text: projects[index].description }
         );
         setProjects((prev) => {
           const newProjects = [...prev];
@@ -213,7 +210,7 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
   // Editable mode view.
   return (
     <div
-      className="relative group border-l-4 border-blue-500 bg-gray-50 rounded-lg p-6 mb-6 transition-transform duration-200 hover:bg-gray-50/80"
+      className="relative group border-l-4 border-blue-500 bg-white shadow-lg rounded-lg p-8 mb-6 transition-transform duration-200 hover:scale-105"
       draggable={!isEditing}
       onDragStart={!isEditing ? fetchProjectsData : undefined}
     >
@@ -330,7 +327,7 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
               </div>
             </div>
           ))}
-          {/* Error Message placed above the Save Changes button */}
+          {/* Error Message above the Save Changes button */}
           {error && (
             <div className="mt-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded shadow">
               {error}
