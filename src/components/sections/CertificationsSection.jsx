@@ -1,9 +1,11 @@
 // src/components/CertificationsSection.jsx
 import { useContext, useState } from "react";
 import PropTypes from "prop-types";
-import { FiAward, FiEdit2, FiZap } from "react-icons/fi"; // Using FiAward for certifications icon
+import { FiAward, FiEdit2 } from "react-icons/fi"; // Using FiAward for certifications icon
 import { ResumeContext } from "../../context/resume-context";
 import Loader from "../common/Loader";
+import ConfirmationModal from "../common/ConfirmationModal";
+import * as Yup from "yup";
 
 const CertificationsSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);
@@ -19,9 +21,27 @@ const CertificationsSection = ({ sectionId, finalMode = false }) => {
 
   const [certifications, setCertifications] = useState(initialCertifications);
   const [isEditing, setIsEditing] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState("");
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  // Certification suggestions for auto-suggestion.
+  const certificationSuggestions = [
+    "AWS Certified Developer",
+    "Certified Information Systems Security Professional (CISSP)",
+    "Google Cloud Certified - Professional Cloud Architect",
+    "PMP Certification",
+    "Scrum Master",
+  ];
+
+  // Yup validation schema for certifications.
+  const certificationsSchema = Yup.array()
+    .of(
+      Yup.string()
+        .required("Certification cannot be empty")
+        .min(3, "Certification must be at least 3 characters")
+    )
+    .min(1, "At least one certification is required");
 
   // Update a specific certification entry.
   const handleCertificationChange = (index, value) => {
@@ -30,56 +50,35 @@ const CertificationsSection = ({ sectionId, finalMode = false }) => {
     setCertifications(newCertifications);
   };
 
-  // Save changes to the global context and exit edit mode.
+  // Save changes after validating, then update the context and exit edit mode.
   const handleSave = () => {
-    updateSectionContent(sectionId, { certifications });
-    setIsEditing(false);
+    certificationsSchema
+      .validate(certifications, { abortEarly: false })
+      .then(() => {
+        updateSectionContent(sectionId, { certifications });
+        setIsEditing(false);
+        setError("");
+      })
+      .catch((validationError) => {
+        if (validationError.inner && validationError.inner.length > 0) {
+          setError(validationError.inner[0].message);
+        } else {
+          setError(validationError.message);
+        }
+      });
   };
 
-  // Add a new empty certification entry without toggling edit mode.
+  // Add a new empty certification entry (visible only in edit mode).
   const handleAddMore = () => {
     setCertifications((prev) => [...prev, ""]);
   };
 
-  // Simulated API call to generate AI-enhanced certifications data.
-  const generateAIContent = async () => {
-    try {
-      setIsGenerating(true);
-      setError("");
-      // Simulated API call – replace with your actual endpoint.
-      const response = await new Promise((resolve) =>
-        setTimeout(
-          () =>
-            resolve({
-              data: {
-                certifications: [
-                  "AWS Certified Developer",
-                  "PMP Certification",
-                  "Scrum Master",
-                ],
-              },
-            }),
-          1500
-        )
-      );
-      setCertifications(response.data.certifications);
-      updateSectionContent(sectionId, {
-        certifications: response.data.certifications,
-      });
-    } catch (err) {
-      console.error(err);
-      setError("Failed to generate AI certifications data. Please try again.");
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  // Simulated API call to fetch certifications data when dragging the component.
+  // Simulated API call to fetch certifications data via drag-to-auto-fill.
   const fetchCertificationsData = async () => {
     try {
       setIsFetching(true);
       setError("");
-      // Simulated API call – replace with your actual endpoint.
+      // Simulated API call – replace with your actual endpoint if needed.
       const response = await new Promise((resolve) =>
         setTimeout(
           () =>
@@ -106,6 +105,24 @@ const CertificationsSection = ({ sectionId, finalMode = false }) => {
     }
   };
 
+  // When dragging in non-edit mode, show the confirmation modal.
+  const handleDragStart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowConfirmation(true);
+  };
+
+  // Confirm auto-fill sample data.
+  const confirmAutoFill = () => {
+    setShowConfirmation(false);
+    fetchCertificationsData();
+  };
+
+  // Cancel auto-fill.
+  const cancelAutoFill = () => {
+    setShowConfirmation(false);
+  };
+
   // ----------------------
   // Final (Preview) Mode: Read-Only Display
   // ----------------------
@@ -125,15 +142,22 @@ const CertificationsSection = ({ sectionId, finalMode = false }) => {
   }
 
   // ----------------------
-  // Editable / View Mode: Display with Action Buttons and Inputs
+  // Editable / View Mode
   // ----------------------
   return (
     <div
-      className="relative group border-l-4 border-blue-500 bg-gray-50 rounded-lg p-6 mb-6 transition-all hover:bg-gray-50/80"
-      draggable
-      onDragStart={fetchCertificationsData} // Dragging auto-fills certifications data.
+      className="relative group border-l-4 border-blue-500 bg-white shadow-lg rounded-lg p-8 mb-6 transition-transform duration-200 hover:scale-105"
+      draggable={!isEditing}
+      onDragStart={!isEditing ? handleDragStart : undefined}
     >
-      {/* Header Row with Icon, Title, and Action Buttons */}
+      {/* Loader overlay when auto-fill is in progress */}
+      {!isEditing && isFetching && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
+          <Loader size="lg" />
+        </div>
+      )}
+
+      {/* Header Row with Icon, Title, and Edit Button */}
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-3">
           <FiAward className="w-6 h-6 text-blue-500" />
@@ -143,20 +167,6 @@ const CertificationsSection = ({ sectionId, finalMode = false }) => {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={generateAIContent}
-            disabled={isGenerating || isFetching}
-            className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50"
-          >
-            {isGenerating ? (
-              <Loader size="sm" />
-            ) : (
-              <>
-                <FiZap className="w-4 h-4" />
-                <span>AI Enhance</span>
-              </>
-            )}
-          </button>
-          <button
             onClick={() => setIsEditing(!isEditing)}
             className="text-gray-500 hover:text-gray-700"
           >
@@ -165,9 +175,6 @@ const CertificationsSection = ({ sectionId, finalMode = false }) => {
         </div>
       </div>
 
-      {error && <div className="mb-3 text-sm text-red-600">{error}</div>}
-
-      {/* Editable / View Content */}
       {isEditing ? (
         <div>
           {certifications.map((cert, index) => (
@@ -183,17 +190,33 @@ const CertificationsSection = ({ sectionId, finalMode = false }) => {
                 onChange={(e) =>
                   handleCertificationChange(index, e.target.value)
                 }
+                list={`cert-suggestions-${index}`}
               />
+              <datalist id={`cert-suggestions-${index}`}>
+                {certificationSuggestions.map((suggestion, i) => (
+                  <option key={i} value={suggestion} />
+                ))}
+              </datalist>
             </div>
           ))}
-          <button
-            onClick={handleSave}
-            className="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-          >
-            Save Changes
-          </button>
+          {error && <div className="mb-3 text-sm text-red-600">{error}</div>}
+          <div className="flex justify-between items-center">
+            <button
+              onClick={handleSave}
+              className="mt-3 px-6 py-3 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+            >
+              Save Changes
+            </button>
+            <button
+              onClick={handleAddMore}
+              className="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            >
+              Add More
+            </button>
+          </div>
         </div>
       ) : (
+        // Preview view (click anywhere to edit)
         <div className="cursor-text" onClick={() => setIsEditing(true)}>
           <ul className="list-disc pl-5 text-gray-700">
             {certifications.map((cert, index) => (
@@ -206,15 +229,13 @@ const CertificationsSection = ({ sectionId, finalMode = false }) => {
         </div>
       )}
 
-      {/* "Add More" Button (Always Visible) */}
-      <div className="mt-4">
-        <button
-          onClick={handleAddMore}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-        >
-          Add More
-        </button>
-      </div>
+      {/* Global confirmation modal rendered via portal */}
+      <ConfirmationModal
+        isOpen={showConfirmation}
+        message="This will replace all previous data with sample data. Do you want to proceed?"
+        onConfirm={confirmAutoFill}
+        onCancel={cancelAutoFill}
+      />
     </div>
   );
 };

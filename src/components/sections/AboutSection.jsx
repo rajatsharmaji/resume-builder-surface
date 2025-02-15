@@ -8,6 +8,7 @@ import axios from "axios";
 import * as Yup from "yup";
 import { ResumeContext } from "../../context/resume-context";
 import Loader from "../common/Loader";
+import ConfirmationModal from "../common/ConfirmationModal";
 
 const AboutSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);
@@ -16,6 +17,7 @@ const AboutSection = ({ sectionId, finalMode = false }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   // Yup validation schema for the About section.
   const aboutSchema = Yup.string()
@@ -97,6 +99,24 @@ const AboutSection = ({ sectionId, finalMode = false }) => {
       });
   };
 
+  // When dragging in non-edit mode, show the confirmation modal.
+  const handleDragStart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowConfirmation(true);
+  };
+
+  // Confirm auto-fill sample data.
+  const confirmAutoFill = () => {
+    setShowConfirmation(false);
+    fetchAboutData();
+  };
+
+  // Cancel auto-fill.
+  const cancelAutoFill = () => {
+    setShowConfirmation(false);
+  };
+
   // Final (read-only) mode view.
   if (finalMode) {
     return (
@@ -115,7 +135,7 @@ const AboutSection = ({ sectionId, finalMode = false }) => {
     <div
       className="relative group border-l-4 border-blue-500 bg-white shadow-lg rounded-lg p-8 mb-6 transition-transform duration-200 hover:scale-105"
       draggable={!isEditing}
-      onDragStart={!isEditing ? fetchAboutData : undefined}
+      onDragStart={!isEditing ? handleDragStart : undefined}
     >
       {/* Loader overlay when auto-fill is in progress (when not editing) */}
       {!isEditing && isGenerating && (
@@ -147,7 +167,6 @@ const AboutSection = ({ sectionId, finalMode = false }) => {
           <textarea
             value={about}
             onChange={(e) => setAbout(e.target.value)}
-            // Updated styling to match ExperienceSection input fields.
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 bg-white resize-none"
             rows="4"
             placeholder="Describe your professional experience, skills, and achievements..."
@@ -206,6 +225,13 @@ const AboutSection = ({ sectionId, finalMode = false }) => {
           </div>
         </div>
       )}
+      {/* Global confirmation modal rendered via portal */}
+      <ConfirmationModal
+        isOpen={showConfirmation}
+        message="This will replace all previous data with sample data. Do you want to proceed?"
+        onConfirm={confirmAutoFill}
+        onCancel={cancelAutoFill}
+      />
     </div>
   );
 };
