@@ -9,6 +9,7 @@ import * as Yup from "yup";
 import { ResumeContext } from "../../context/resume-context";
 import Loader from "../common/Loader";
 import ConfirmationModal from "../common/ConfirmationModal";
+import AIPreviewModal from "../common/AIPreviewModal";
 
 const AboutSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);
@@ -19,19 +20,27 @@ const AboutSection = ({ sectionId, finalMode = false }) => {
   const [error, setError] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
 
+  // New state for AI content preview and confirmation
+  const [aiResult, setAiResult] = useState("");
+  const [showAIPreview, setShowAIPreview] = useState(false);
+  const [showAIReplaceAlert, setShowAIReplaceAlert] = useState(false);
+
+  // New state for Sample confirmation modal and AI cancel confirmation modal
+  const [showSampleConfirm, setShowSampleConfirm] = useState(false);
+  const [showAICancelConfirm, setShowAICancelConfirm] = useState(false);
+
   // Yup validation schema for the About section.
   const aboutSchema = Yup.string()
     .required("About section cannot be empty")
     .min(10, "About section must be at least 10 characters");
 
-  // Function to insert sample data.
-  const addSampleData = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  // Function to insert sample data (without event parameter)
+  const confirmSampleData = () => {
     const sampleData =
       "Passionate software engineer with expertise in full-stack development, cloud computing, and agile methodologies.";
     setAbout(sampleData);
-    // Update context only on save.
+    setShowSampleConfirm(false);
+    // Note: Context is updated only on save.
   };
 
   // Function to call AI to enhance content.
@@ -46,7 +55,9 @@ const AboutSection = ({ sectionId, finalMode = false }) => {
         { text: about }
       );
       const result = response.data.result;
-      setAbout(result);
+      // Instead of directly setting the about content, show it in a full-page AI preview popup.
+      setAiResult(result);
+      setShowAIPreview(true);
       // Update context only on save.
     } catch (err) {
       console.error(err);
@@ -117,6 +128,42 @@ const AboutSection = ({ sectionId, finalMode = false }) => {
     setShowConfirmation(false);
   };
 
+  // --- New functions for AI content preview and confirmation ---
+
+  // When user clicks "Add" on the AI preview popup, show the replacement alert.
+  const handleAIPreviewAdd = () => {
+    setShowAIPreview(false);
+    setShowAIReplaceAlert(true);
+  };
+
+  // When user confirms replacement of previous content.
+  const confirmAIReplace = () => {
+    setAbout(aiResult);
+    setShowAIReplaceAlert(false);
+  };
+
+  // When user cancels the replacement alert.
+  const cancelAIReplace = () => {
+    setShowAIReplaceAlert(false);
+  };
+
+  // For AI Preview modal cancel, hide the AI Preview Modal and then show the cancel confirmation modal.
+  const handleAIPreviewCancelClick = () => {
+    setShowAIPreview(false);
+    setShowAICancelConfirm(true);
+  };
+
+  // When user confirms AI cancel (i.e. discards the generated content).
+  const confirmAICancel = () => {
+    setShowAICancelConfirm(false);
+  };
+
+  // When user cancels the AI cancel confirmation, re-show the AI Preview Modal.
+  const cancelAICancel = () => {
+    setShowAICancelConfirm(false);
+    setShowAIPreview(true);
+  };
+
   // Final (read-only) mode view.
   if (finalMode) {
     return (
@@ -175,7 +222,7 @@ const AboutSection = ({ sectionId, finalMode = false }) => {
           <div className="flex gap-3 mt-3">
             <button
               type="button"
-              onClick={addSampleData}
+              onClick={() => setShowSampleConfirm(true)}
               className="flex items-center gap-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-md shadow-sm hover:bg-gray-300 transition-colors text-sm"
             >
               <FaMagic className="w-5 h-5" />
@@ -225,12 +272,47 @@ const AboutSection = ({ sectionId, finalMode = false }) => {
           </div>
         </div>
       )}
-      {/* Global confirmation modal rendered via portal */}
+
+      {/* --- Global Modals Rendered via Portals --- */}
+
+      {/* Confirmation modal for auto-fill sample data (drag-to-auto-fill) */}
       <ConfirmationModal
         isOpen={showConfirmation}
         message="This will replace all previous data with sample data. Do you want to proceed?"
         onConfirm={confirmAutoFill}
         onCancel={cancelAutoFill}
+      />
+
+      {/* Confirmation modal for Sample button */}
+      <ConfirmationModal
+        isOpen={showSampleConfirm}
+        message="This will replace your current content with sample data. Do you want to proceed?"
+        onConfirm={confirmSampleData}
+        onCancel={() => setShowSampleConfirm(false)}
+      />
+
+      {/* AI Preview Popup (full-page via portal with transparent background) */}
+      <AIPreviewModal
+        isOpen={showAIPreview}
+        aiResult={aiResult}
+        onAdd={handleAIPreviewAdd}
+        onCancel={handleAIPreviewCancelClick} // triggers AI cancel confirmation
+      />
+
+      {/* Replacement confirmation alert for AI content */}
+      <ConfirmationModal
+        isOpen={showAIReplaceAlert}
+        message="This will replace all previous content. Do you want to proceed?"
+        onConfirm={confirmAIReplace}
+        onCancel={cancelAIReplace}
+      />
+
+      {/* Confirmation modal for AI Preview cancel */}
+      <ConfirmationModal
+        isOpen={showAICancelConfirm}
+        message="Cancelling will discard the AI generated content. Do you want to proceed?"
+        onConfirm={confirmAICancel}
+        onCancel={cancelAICancel}
       />
     </div>
   );
