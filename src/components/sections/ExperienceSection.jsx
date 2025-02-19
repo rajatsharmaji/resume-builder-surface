@@ -9,6 +9,7 @@ import * as Yup from "yup";
 import { ResumeContext } from "../../context/resume-context";
 import Loader from "../common/Loader";
 import ConfirmationModal from "../common/ConfirmationModal";
+import AIPreviewModal from "../common/AIPreviewModal";
 
 const ExperienceSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);
@@ -57,6 +58,14 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
   const [error, setError] = useState("");
   const [generatingDescIndex, setGeneratingDescIndex] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showAIPreview, setShowAIPreview] = useState(false);
+  const [showSampleConfirm, setShowSampleConfirm] = useState(false);
+  const [showAICancelConfirm, setShowAICancelConfirm] = useState(false);
+
+  // New state for AI preview and sample confirmation
+  const [aiResult, setAiResult] = useState("");
+  const [aiIndex, setAiIndex] = useState(null);
+  const [sampleIndex, setSampleIndex] = useState(null);
 
   // Yup validation schema for each experience entry with custom date order validation
   const experienceEntrySchema = Yup.object()
@@ -264,54 +273,84 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
     }
   }, [updateSectionContent, sectionId]);
 
-  // Insert a sample description without immediately updating context.
-  const handleSampleDesc = useCallback((index, e) => {
+  // ----- SAMPLE DATA CONFIRMATION -----
+  // Instead of immediately setting sample description, we now trigger a confirmation modal.
+  const confirmSampleData = () => {
+    const sampleDesc =
+      "Developed innovative solutions and improved system performance.";
+    if (sampleIndex !== null) {
+      setExperience((prev) => {
+        const newExp = [...prev];
+        newExp[sampleIndex] = {
+          ...newExp[sampleIndex],
+          description: sampleDesc,
+        };
+        return newExp;
+      });
+    }
+    setShowSampleConfirm(false);
+    setSampleIndex(null);
+  };
+
+  // ----- AI ENHANCEMENT HANDLERS -----
+  // Call AI to enhance the description; show the result in a preview modal for confirmation.
+  const generateAIContent = async (index, e) => {
     if (e) {
       e.stopPropagation();
       e.preventDefault();
     }
-    const sampleDesc =
-      "Developed innovative solutions and improved system performance.";
-    setExperience((prev) => {
-      const newExp = [...prev];
-      newExp[index] = { ...newExp[index], description: sampleDesc };
-      return newExp;
-    });
-  }, []);
+    try {
+      setGeneratingDescIndex(index);
+      setAiIndex(index);
+      setError("");
+      const response = await axios.post(
+        "http://localhost:3008/api/v1/ai/experience-description",
+        { text: experience[index].description }
+      );
+      setAiResult(response.data.result);
+      setShowAIPreview(true);
+      // Update context only on save.
+    } catch (err) {
+      console.error(err);
+      setError("Failed to generate content. Please try again.");
+    } finally {
+      setGeneratingDescIndex(null);
+    }
+  };
 
-  // Call AI to enhance the description; update local state only.
-  const handleAIDesc = useCallback(
-    async (index, e) => {
-      if (e) {
-        e.stopPropagation();
-        e.preventDefault();
-      }
-      try {
-        setGeneratingDescIndex(index);
-        setError("");
-        const response = await axios.post(
-          "http://localhost:3008/api/v1/ai/experience-description",
-          {
-            text: experience[index].description,
-          }
-        );
-        setExperience((prev) => {
-          const newExp = [...prev];
-          newExp[index] = {
-            ...newExp[index],
-            description: response.data.result,
-          };
-          return newExp;
-        });
-      } catch (err) {
-        console.error(err);
-        setError("Failed to enhance description. Please try again.");
-      } finally {
-        setGeneratingDescIndex(null);
-      }
-    },
-    [experience]
-  );
+  // When the user clicks "Add" in the AI preview modal, directly update the description.
+  const handleAIPreviewAdd = () => {
+    if (aiIndex !== null) {
+      setExperience((prev) => {
+        const newExp = [...prev];
+        newExp[aiIndex] = {
+          ...newExp[aiIndex],
+          description: aiResult,
+        };
+        return newExp;
+      });
+    }
+    setShowAIPreview(false);
+    setAiIndex(null);
+    setAiResult("");
+  };
+
+  // For AI Preview modal cancel, hide the AI Preview Modal and then show the cancel confirmation modal.
+  const handleAIPreviewCancelClick = () => {
+    setShowAIPreview(false);
+    setShowAICancelConfirm(true);
+  };
+
+  // When user confirms AI cancel (i.e. discards the generated content).
+  const confirmAICancel = () => {
+    setShowAICancelConfirm(false);
+  };
+
+  // When user cancels the AI cancel confirmation, re-show the AI Preview Modal.
+  const cancelAICancel = () => {
+    setShowAICancelConfirm(false);
+    setShowAIPreview(true);
+  };
 
   // Handle drag to auto-fill sample data with confirmation modal.
   const handleDragStart = (e) => {
@@ -564,7 +603,11 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
                 <div className="flex gap-3 mt-3">
                   <button
                     type="button"
-                    onClick={(e) => handleSampleDesc(index, e)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSampleIndex(index);
+                      setShowSampleConfirm(true);
+                    }}
                     className="flex items-center gap-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-md shadow-sm hover:bg-gray-300 transition-colors text-sm"
                   >
                     <FaMagic />
@@ -572,7 +615,7 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
                   </button>
                   <button
                     type="button"
-                    onClick={(e) => handleAIDesc(index, e)}
+                    onClick={(e) => generateAIContent(index, e)}
                     disabled={generatingDescIndex === index}
                     className="flex items-center gap-1 px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600 transition-colors text-sm disabled:opacity-50"
                   >
@@ -652,11 +695,37 @@ const ExperienceSection = ({ sectionId, finalMode = false }) => {
         </div>
       )}
 
+      {/* --- Global Modals Rendered via Portals --- */}
+
       <ConfirmationModal
         isOpen={showConfirmation}
         message="This will replace all previous data with sample data. Do you want to proceed?"
         onConfirm={confirmAutoFill}
         onCancel={cancelAutoFill}
+      />
+
+      {/* Confirmation modal for Sample button */}
+      <ConfirmationModal
+        isOpen={showSampleConfirm}
+        message="This will replace your current content with sample data. Do you want to proceed?"
+        onConfirm={confirmSampleData}
+        onCancel={() => setShowSampleConfirm(false)}
+      />
+
+      {/* AI Preview Popup (full-page via portal with transparent background) */}
+      <AIPreviewModal
+        isOpen={showAIPreview}
+        aiResult={aiResult}
+        onAdd={handleAIPreviewAdd}
+        onCancel={handleAIPreviewCancelClick} // triggers AI cancel confirmation
+      />
+
+      {/* Confirmation modal for AI Preview cancel */}
+      <ConfirmationModal
+        isOpen={showAICancelConfirm}
+        message="Cancelling will discard the AI generated content. Do you want to proceed?"
+        onConfirm={confirmAICancel}
+        onCancel={cancelAICancel}
       />
     </div>
   );

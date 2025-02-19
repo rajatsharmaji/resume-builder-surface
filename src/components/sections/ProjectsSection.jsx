@@ -9,6 +9,7 @@ import * as Yup from "yup";
 import { ResumeContext } from "../../context/resume-context";
 import Loader from "../common/Loader";
 import ConfirmationModal from "../common/ConfirmationModal";
+import AIPreviewModal from "../common/AIPreviewModal";
 
 const ProjectsSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);
@@ -29,6 +30,14 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
   // Track which project description is currently being AI enhanced.
   const [generatingDescIndex, setGeneratingDescIndex] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+
+  // New state for AI preview and sample confirmation.
+  const [aiResult, setAiResult] = useState("");
+  const [aiIndex, setAiIndex] = useState(null);
+  const [showAIPreview, setShowAIPreview] = useState(false);
+  const [showSampleConfirm, setShowSampleConfirm] = useState(false);
+  const [showAICancelConfirm, setShowAICancelConfirm] = useState(false);
+  const [sampleIndex, setSampleIndex] = useState(null);
 
   // Suggested project title keywords.
   const projectTitleSuggestions = [
@@ -129,54 +138,6 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
     }
   };
 
-  // Handle inserting sample project description.
-  const handleProjectSampleDesc = useCallback((index, e) => {
-    if (e) {
-      e.stopPropagation();
-      e.preventDefault();
-    }
-    const sampleDesc =
-      "Developed innovative solutions that streamline processes and boost performance.";
-    setProjects((prev) => {
-      const newProjects = [...prev];
-      newProjects[index] = { ...newProjects[index], description: sampleDesc };
-      return newProjects;
-    });
-  }, []);
-
-  // Handle calling AI to enhance project description.
-  const handleProjectAIDesc = useCallback(
-    async (index, e) => {
-      if (e) {
-        e.stopPropagation();
-        e.preventDefault();
-      }
-      try {
-        setGeneratingDescIndex(index);
-        setError("");
-        // Simulated API call – replace with your actual endpoint.
-        const response = await axios.post(
-          "http://localhost:3008/api/v1/ai/project-description",
-          { text: projects[index].description }
-        );
-        setProjects((prev) => {
-          const newProjects = [...prev];
-          newProjects[index] = {
-            ...newProjects[index],
-            description: response.data.result,
-          };
-          return newProjects;
-        });
-      } catch (err) {
-        console.error(err);
-        setError("Failed to enhance project description. Please try again.");
-      } finally {
-        setGeneratingDescIndex(null);
-      }
-    },
-    [projects]
-  );
-
   // Handle drag-to-auto-fill with confirmation modal.
   const handleDragStart = (e) => {
     e.preventDefault();
@@ -191,6 +152,87 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
 
   const cancelAutoFill = () => {
     setShowConfirmation(false);
+  };
+
+  // ----- SAMPLE DATA CONFIRMATION -----
+  // Instead of immediately setting sample project description, trigger a confirmation modal.
+  const confirmSampleData = () => {
+    const sampleDesc =
+      "Developed innovative solutions that streamline processes and boost performance.";
+    if (sampleIndex !== null) {
+      setProjects((prev) => {
+        const newProjects = [...prev];
+        newProjects[sampleIndex] = {
+          ...newProjects[sampleIndex],
+          description: sampleDesc,
+        };
+        return newProjects;
+      });
+    }
+    setShowSampleConfirm(false);
+    setSampleIndex(null);
+  };
+
+  // ----- AI ENHANCEMENT HANDLERS -----
+  // Call AI to enhance the project description; show the result in a preview modal for confirmation.
+  const handleProjectAIDesc = useCallback(
+    async (index, e) => {
+      if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+      try {
+        setGeneratingDescIndex(index);
+        setAiIndex(index);
+        setError("");
+        const response = await axios.post(
+          "http://localhost:3008/api/v1/ai/project-description",
+          { text: projects[index].description }
+        );
+        setAiResult(response.data.result);
+        setShowAIPreview(true);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to enhance project description. Please try again.");
+      } finally {
+        setGeneratingDescIndex(null);
+      }
+    },
+    [projects]
+  );
+
+  // When the user clicks "Add" in the AI preview modal, update the description.
+  const handleAIPreviewAdd = () => {
+    if (aiIndex !== null) {
+      setProjects((prev) => {
+        const newProjects = [...prev];
+        newProjects[aiIndex] = {
+          ...newProjects[aiIndex],
+          description: aiResult,
+        };
+        return newProjects;
+      });
+    }
+    setShowAIPreview(false);
+    setAiIndex(null);
+    setAiResult("");
+  };
+
+  // For AI Preview modal cancel, hide the modal and then show a cancel confirmation modal.
+  const handleAIPreviewCancelClick = () => {
+    setShowAIPreview(false);
+    setShowAICancelConfirm(true);
+  };
+
+  // When the user confirms AI cancel (i.e. discards the generated content).
+  const confirmAICancel = () => {
+    setShowAICancelConfirm(false);
+  };
+
+  // When the user cancels the AI cancel confirmation, re-show the AI Preview Modal.
+  const cancelAICancel = () => {
+    setShowAICancelConfirm(false);
+    setShowAIPreview(true);
   };
 
   // Final (read-only) mode view.
@@ -305,7 +347,11 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
               <div className="flex gap-3 mt-3">
                 <button
                   type="button"
-                  onClick={(e) => handleProjectSampleDesc(index, e)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSampleIndex(index);
+                    setShowSampleConfirm(true);
+                  }}
                   className="flex items-center gap-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-md shadow-sm hover:bg-gray-300 transition-colors text-sm"
                 >
                   <FaMagic className="w-4 h-4" />
@@ -398,12 +444,36 @@ const ProjectsSection = ({ sectionId, finalMode = false }) => {
         </div>
       )}
 
-      {/* Global confirmation modal rendered via portal */}
+      {/* --- Global Modals Rendered via Portals --- */}
       <ConfirmationModal
         isOpen={showConfirmation}
         message="This will replace all previous data with sample data. Do you want to proceed?"
         onConfirm={confirmAutoFill}
         onCancel={cancelAutoFill}
+      />
+
+      {/* Confirmation modal for Sample button */}
+      <ConfirmationModal
+        isOpen={showSampleConfirm}
+        message="This will replace your current content with sample data. Do you want to proceed?"
+        onConfirm={confirmSampleData}
+        onCancel={() => setShowSampleConfirm(false)}
+      />
+
+      {/* AI Preview Popup (full-page via portal with transparent background) */}
+      <AIPreviewModal
+        isOpen={showAIPreview}
+        aiResult={aiResult}
+        onAdd={handleAIPreviewAdd}
+        onCancel={handleAIPreviewCancelClick} // triggers AI cancel confirmation
+      />
+
+      {/* Confirmation modal for AI Preview cancel */}
+      <ConfirmationModal
+        isOpen={showAICancelConfirm}
+        message="Cancelling will discard the AI generated content. Do you want to proceed?"
+        onConfirm={confirmAICancel}
+        onCancel={cancelAICancel}
       />
     </div>
   );

@@ -2,9 +2,13 @@
 import { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import { FiAward, FiEdit2 } from "react-icons/fi"; // Using FiAward for certifications icon
+import { FaMagic } from "react-icons/fa";
+import { AiFillThunderbolt } from "react-icons/ai";
+import axios from "axios";
 import { ResumeContext } from "../../context/resume-context";
 import Loader from "../common/Loader";
 import ConfirmationModal from "../common/ConfirmationModal";
+import AIPreviewModal from "../common/AIPreviewModal";
 import * as Yup from "yup";
 
 const CertificationsSection = ({ sectionId, finalMode = false }) => {
@@ -24,6 +28,15 @@ const CertificationsSection = ({ sectionId, finalMode = false }) => {
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
+
+  // New state for AI preview and sample confirmation.
+  const [aiResult, setAiResult] = useState("");
+  const [aiIndex, setAiIndex] = useState(null);
+  const [showAIPreview, setShowAIPreview] = useState(false);
+  const [showSampleConfirm, setShowSampleConfirm] = useState(false);
+  const [sampleIndex, setSampleIndex] = useState(null);
+  const [showAICancelConfirm, setShowAICancelConfirm] = useState(false);
+  const [generatingDescIndex, setGeneratingDescIndex] = useState(null);
 
   // Certification suggestions for auto-suggestion.
   const certificationSuggestions = [
@@ -123,6 +136,73 @@ const CertificationsSection = ({ sectionId, finalMode = false }) => {
     setShowConfirmation(false);
   };
 
+  // ----- SAMPLE DATA CONFIRMATION -----
+  const confirmSampleData = () => {
+    const sampleText =
+      "Certified in advanced cloud computing and security best practices.";
+    if (sampleIndex !== null) {
+      setCertifications((prev) => {
+        const newCerts = [...prev];
+        newCerts[sampleIndex] = sampleText;
+        return newCerts;
+      });
+    }
+    setShowSampleConfirm(false);
+    setSampleIndex(null);
+  };
+
+  // ----- AI ENHANCEMENT HANDLERS -----
+  const handleCertificationAIDesc = async (index, e) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    try {
+      setGeneratingDescIndex(index);
+      setAiIndex(index);
+      setError("");
+      // Call the API to generate AI certification data. Replace the URL with your actual endpoint.
+      const response = await axios.post(
+        "http://localhost:3008/api/v1/ai/certifications",
+        { text: certifications[index] }
+      );
+      setAiResult(response.data.result);
+      setShowAIPreview(true);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to generate certification data. Please try again.");
+    } finally {
+      setGeneratingDescIndex(null);
+    }
+  };
+
+  const handleAIPreviewAdd = () => {
+    if (aiIndex !== null) {
+      setCertifications((prev) => {
+        const newCerts = [...prev];
+        newCerts[aiIndex] = aiResult;
+        return newCerts;
+      });
+    }
+    setShowAIPreview(false);
+    setAiIndex(null);
+    setAiResult("");
+  };
+
+  const handleAIPreviewCancelClick = () => {
+    setShowAIPreview(false);
+    setShowAICancelConfirm(true);
+  };
+
+  const confirmAICancel = () => {
+    setShowAICancelConfirm(false);
+  };
+
+  const cancelAICancel = () => {
+    setShowAICancelConfirm(false);
+    setShowAIPreview(true);
+  };
+
   // ----------------------
   // Final (Preview) Mode: Read-Only Display
   // ----------------------
@@ -197,6 +277,35 @@ const CertificationsSection = ({ sectionId, finalMode = false }) => {
                   <option key={i} value={suggestion} />
                 ))}
               </datalist>
+              <div className="flex gap-3 mt-2">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSampleIndex(index);
+                    setShowSampleConfirm(true);
+                  }}
+                  className="flex items-center gap-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-md shadow-sm hover:bg-gray-300 transition-colors text-sm"
+                >
+                  <FaMagic className="w-4 h-4" />
+                  <span>Sample</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => handleCertificationAIDesc(index, e)}
+                  disabled={generatingDescIndex === index}
+                  className="flex items-center gap-1 px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600 transition-colors text-sm disabled:opacity-50"
+                >
+                  {generatingDescIndex === index ? (
+                    <Loader size="sm" />
+                  ) : (
+                    <>
+                      <AiFillThunderbolt className="w-4 h-4" />
+                      <span>AI Enhance</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           ))}
           {error && <div className="mb-3 text-sm text-red-600">{error}</div>}
@@ -229,12 +338,33 @@ const CertificationsSection = ({ sectionId, finalMode = false }) => {
         </div>
       )}
 
-      {/* Global confirmation modal rendered via portal */}
+      {/* Global modals rendered via portals */}
       <ConfirmationModal
         isOpen={showConfirmation}
         message="This will replace all previous data with sample data. Do you want to proceed?"
         onConfirm={confirmAutoFill}
         onCancel={cancelAutoFill}
+      />
+
+      <ConfirmationModal
+        isOpen={showSampleConfirm}
+        message="This will replace your current certification with sample data. Do you want to proceed?"
+        onConfirm={confirmSampleData}
+        onCancel={() => setShowSampleConfirm(false)}
+      />
+
+      <AIPreviewModal
+        isOpen={showAIPreview}
+        aiResult={aiResult}
+        onAdd={handleAIPreviewAdd}
+        onCancel={handleAIPreviewCancelClick} // triggers AI cancel confirmation
+      />
+
+      <ConfirmationModal
+        isOpen={showAICancelConfirm}
+        message="Cancelling will discard the AI generated content. Do you want to proceed?"
+        onConfirm={confirmAICancel}
+        onCancel={cancelAICancel}
       />
     </div>
   );
