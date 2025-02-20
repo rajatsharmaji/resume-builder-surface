@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import SectionList from "../SectionList"; // adjust the path if needed
+import SectionList from "../SectionList";
 
 const LayersPanel = ({ sections, moveSection, removeSection }) => {
   return (

@@ -3,7 +3,7 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { FiDownload, FiEdit } from "react-icons/fi";
 import axios from "axios";
-import Loader from "./common/Loader";
+import Loader from "../../../shared/components/Loader";
 import PdfPreviewer from "./PdfPreviewer";
 import PdfEditor from "./PdfEditor";
 

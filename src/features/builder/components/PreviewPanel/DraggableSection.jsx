@@ -2,15 +2,14 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { FaTrashAlt } from "react-icons/fa";
-
-import HeaderSection from "../sections/HeaderSection";
-import FooterSection from "../sections/FooterSection";
-import EducationSection from "../sections/EducationSection";
-import ExperienceSection from "../sections/ExperienceSection";
-import SkillsSection from "../sections/SkillsSection";
-import AboutSection from "../sections/AboutSection";
-import ProjectsSection from "../sections/ProjectsSection";
-import CertificationsSection from "../sections/CertificationsSection";
+import HeaderSection from "../Sections/HeaderSection";
+import FooterSection from "../Sections/FooterSection";
+import EducationSection from "../Sections/EducationSection";
+import ExperienceSection from "../Sections/ExperienceSection";
+import SkillsSection from "../Sections/SkillsSection";
+import AboutSection from "../Sections/AboutSection";
+import ProjectsSection from "../Sections/ProjectsSection";
+import CertificationsSection from "../Sections/CertificationsSection";
 
 // Map section types to their respective components.
 const sectionComponents = {

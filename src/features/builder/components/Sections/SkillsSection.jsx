@@ -2,10 +2,10 @@
 import { useContext, useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import { FiCode, FiEdit2, FiZap } from "react-icons/fi";
-import { ResumeContext } from "../../context/resume-context";
-import Loader from "../common/Loader";
+import { ResumeContext } from "../../../../shared/context/resume-context";
+import Loader from "../../../../shared/components/Loader";
 import * as Yup from "yup";
-import ConfirmationModal from "../common/ConfirmationModal";
+import ConfirmationModal from "../../../../shared/components/ConfirmationModal";
 
 const SkillsSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);

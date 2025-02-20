@@ -9,9 +9,9 @@ import {
   FiEdit2,
 } from "react-icons/fi";
 import * as Yup from "yup";
-import { ResumeContext } from "../../context/resume-context";
-import Loader from "../common/Loader";
-import ConfirmationModal from "../common/ConfirmationModal";
+import { ResumeContext } from "../../../../shared/context/resume-context";
+import Loader from "../../../../shared/components/Loader";
+import ConfirmationModal from "../../../../shared/components/ConfirmationModal";
 
 const HeaderSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);

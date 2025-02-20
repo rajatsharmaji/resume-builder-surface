@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import ResumeGenerator from "../ResumeGenerator";
 import ContextMenu from "./ContextMenu";
-import DraggableSection from "../preview-panel/DraggableSection";
+import DraggableSection from "./DraggableSection";
 
 const PreviewPanel = ({
   sections,

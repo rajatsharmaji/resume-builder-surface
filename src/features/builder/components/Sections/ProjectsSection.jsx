@@ -6,10 +6,10 @@ import { FaMagic } from "react-icons/fa";
 import { AiFillThunderbolt } from "react-icons/ai";
 import axios from "axios";
 import * as Yup from "yup";
-import { ResumeContext } from "../../context/resume-context";
-import Loader from "../common/Loader";
-import ConfirmationModal from "../common/ConfirmationModal";
-import AIPreviewModal from "../common/AIPreviewModal";
+import { ResumeContext } from "../../../../shared/context/resume-context";
+import Loader from "../../../../shared/components/Loader";
+import ConfirmationModal from "../../../../shared/components/ConfirmationModal";
+import AIPreviewModal from "../../../../shared/components/AIPreviewModal";
 
 const ProjectsSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);

@@ -2,8 +2,8 @@
 import { useContext, useState } from "react";
 import PropTypes from "prop-types";
 import { FiFileText, FiZap, FiEdit2 } from "react-icons/fi"; // Added FiZap and FiEdit2 for actions
-import { ResumeContext } from "../../context/resume-context";
-import Loader from "../common/Loader";
+import { ResumeContext } from "../../../../shared/context/resume-context";
+import Loader from "../../../../shared/components/Loader";
 
 const FooterSection = ({ sectionId, finalMode = false }) => {
   const { sectionsData, updateSectionContent } = useContext(ResumeContext);

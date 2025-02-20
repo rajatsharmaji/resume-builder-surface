@@ -1,9 +1,9 @@
 import { useRef, useState, useEffect, useContext } from "react";
-import useResume from "../hooks/useResume";
-import ElementsPanel from "../components/left-panel/ElementsPanel";
-import LayersPanel from "../components/left-panel/LayersPanel";
-import PreviewPanel from "../components/preview-panel/PreviewPanel";
-import RightPanel from "../components/right-panel/RightPanel";
+import useResume from "../../shared/hooks/useResume";
+import ElementsPanel from "./components/LeftPanel/ElementsPanel";
+import LayersPanel from "./components/LeftPanel/LayersPanel";
+import PreviewPanel from "./components/PreviewPanel/PreviewPanel";
+import RightPanel from "./components/RightPanel/RightPanel";
 import {
   FiAward,
   FiBook,
@@ -16,11 +16,11 @@ import {
   FiX,
 } from "react-icons/fi";
 import { MdFlashOn, MdSettings } from "react-icons/md";
-import { ResumeContext } from "../context/resume-context";
-import ResumeGenerator from "../components/ResumeGenerator";
-import Loader from "../components/common/Loader";
+import { ResumeContext } from "../../shared/context/resume-context";
+import ResumeGenerator from "./components/ResumeGenerator";
+import Loader from "../../shared/components/Loader";
 import axios from "axios";
-import { constructResumePayload } from "../utils/resumeUtils";
+import { constructResumePayload } from "../../shared/utils/resumeUtils";
 
 const useResumeGeneration = () => {
   const { sectionsData } = useContext(ResumeContext);

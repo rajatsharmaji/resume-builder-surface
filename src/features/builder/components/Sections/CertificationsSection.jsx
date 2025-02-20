@@ -5,10 +5,10 @@ import { FiAward, FiEdit2 } from "react-icons/fi"; // Using FiAward for certific
 import { FaMagic } from "react-icons/fa";
 import { AiFillThunderbolt } from "react-icons/ai";
 import axios from "axios";
-import { ResumeContext } from "../../context/resume-context";
-import Loader from "../common/Loader";
-import ConfirmationModal from "../common/ConfirmationModal";
-import AIPreviewModal from "../common/AIPreviewModal";
+import { ResumeContext } from "../../../../shared/context/resume-context";
+import Loader from "../../../../shared/components/Loader";
+import ConfirmationModal from "../../../../shared/components/ConfirmationModal";
+import AIPreviewModal from "../../../../shared/components/AIPreviewModal";
 import * as Yup from "yup";
 
 const CertificationsSection = ({ sectionId, finalMode = false }) => {
