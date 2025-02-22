@@ -1,34 +1,42 @@
 export const constructResumePayload = (sectionsData) => {
-  const dataArray = Object.keys(sectionsData).map((key) => ({
-    id: key,
-    ...sectionsData[key],
+  // Retrieve the ordered sections array from local storage
+  const resumeSections =
+    JSON.parse(localStorage.getItem("resumeSections")) || [];
+
+  // Create an ordered array by merging each section's metadata (id and type)
+  // with the corresponding content from sectionsData.
+  const dataArray = resumeSections.map((section) => ({
+    id: section.id,
+    // Use the type from the resumeSections array (ignoring type in sectionsData if it exists)
+    type: section.type,
+    // Get the content from sectionsData if available, otherwise an empty object.
+    content: sectionsData[section.id] ? sectionsData[section.id].content : {},
   }));
 
   const resume = {};
 
-  const headerSection = dataArray.find((s) => !s.type || s.type === "header");
+  // Header Section
+  const headerSection = dataArray.find((s) => s.type === "header");
   if (headerSection && headerSection.content) {
-    const names = headerSection.content.name.split(" ");
+    const content = headerSection.content;
+    const names = content.name.split(" ");
     resume.firstName = names[0] || "";
     resume.lastName = names.slice(1).join(" ") || "";
-    resume.email = headerSection.content.email || "";
-    resume.phone = headerSection.content.phone || "";
-    resume.website =
-      headerSection.content.linkedin || headerSection.content.github || "";
-    resume.links = {};
-    if (headerSection.content.linkedin) {
-      resume.links["LinkedIn"] = headerSection.content.linkedin;
-    }
-    if (headerSection.content.github) {
-      resume.links["GitHub"] = headerSection.content.github;
-    }
+    resume.email = content.email || "";
+    resume.phone = content.phone || "";
+    resume.linkedinAlias = content.linkedinAlias || "";
+    resume.linkedinLink = content.linkedinLink || "";
+    resume.githubAlias = content.githubAlias || "";
+    resume.githubLink = content.githubLink || "";
   }
 
+  // About Section
   const aboutSection = dataArray.find((s) => s.type === "about");
   if (aboutSection && aboutSection.content) {
     resume.about = aboutSection.content.about || "";
   }
 
+  // Education Section
   const educationSection = dataArray.find((s) => s.type === "education");
   if (
     educationSection &&
@@ -38,14 +46,20 @@ export const constructResumePayload = (sectionsData) => {
     resume.education = educationSection.content.education.map((edu) => ({
       institution: edu.school,
       degree: edu.degree,
-      graduationDate: edu.year,
+      graduationDate:
+        !edu.isCurrent && edu.endMonth && edu.endYear
+          ? `${edu.endMonth} ${edu.endYear}`
+          : edu.isCurrent
+          ? "Present"
+          : "",
       location: edu.location || "",
-      gpa: edu.gpa || "",
+      gpa: edu.score || "",
     }));
   } else {
     resume.education = [];
   }
 
+  // Experience Section
   const experienceSection = dataArray.find((s) => s.type === "experience");
   if (
     experienceSection &&
@@ -55,8 +69,15 @@ export const constructResumePayload = (sectionsData) => {
     resume.experience = experienceSection.content.experience.map((exp) => ({
       company: exp.company,
       position: exp.role,
-      startDate: exp.startDate || "",
-      endDate: exp.endDate || "",
+      startDate:
+        exp.startMonth && exp.startYear
+          ? `${exp.startMonth} ${exp.startYear}`
+          : "",
+      endDate: exp.isCurrent
+        ? "Present"
+        : exp.endMonth && exp.endYear
+        ? `${exp.endMonth} ${exp.endYear}`
+        : "",
       location: exp.location || "",
       details: exp.description ? [exp.description] : [],
     }));
@@ -64,6 +85,7 @@ export const constructResumePayload = (sectionsData) => {
     resume.experience = [];
   }
 
+  // Skills Section
   const skillsSection = dataArray.find((s) => s.type === "skills");
   if (skillsSection && skillsSection.content && skillsSection.content.skills) {
     resume.skills = [
@@ -76,6 +98,7 @@ export const constructResumePayload = (sectionsData) => {
     resume.skills = [];
   }
 
+  // Projects Section
   const projectsSection = dataArray.find((s) => s.type === "projects");
   if (
     projectsSection &&
@@ -94,6 +117,7 @@ export const constructResumePayload = (sectionsData) => {
     resume.projects = [];
   }
 
+  // Certifications Section (mapped as awards)
   const certificationsSection = dataArray.find(
     (s) => s.type === "certifications"
   );
@@ -113,6 +137,7 @@ export const constructResumePayload = (sectionsData) => {
     resume.awards = [];
   }
 
+  // Add the currently selected template from local storage.
   const currentTemplate = localStorage.getItem("selectedTemplate") || "default";
   resume.template = currentTemplate;
 

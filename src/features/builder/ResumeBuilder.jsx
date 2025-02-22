@@ -35,7 +35,6 @@ const useResumeGeneration = () => {
     setPdfDataUrl(null);
 
     const payload = constructResumePayload(sectionsData);
-    console.log("Generating resume with payload:", payload);
     try {
       const response = await axios.post(
         "http://localhost:3008/api/v1/resume/generate-resume",
@@ -47,7 +46,6 @@ const useResumeGeneration = () => {
       const pdfUrl = URL.createObjectURL(pdfBlob);
       setPdfDataUrl(pdfUrl);
       setHtmlData(html);
-      console.log(html);
     } catch (err) {
       console.error("Error generating resume:", err);
       setError("Failed to generate resume. Please try again.");
