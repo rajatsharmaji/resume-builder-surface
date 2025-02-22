@@ -1,7 +1,12 @@
 export const constructResumePayload = (sectionsData) => {
+  // Ensure sectionsData is not null.
+  if (!sectionsData) {
+    sectionsData = {};
+  }
+
   // Retrieve the ordered sections array from local storage
   const resumeSections =
-    JSON.parse(localStorage.getItem("resumeSections")) || [];
+    JSON.parse(localStorage.getItem("resumeSections") || "[]") || [];
 
   // Create an ordered array by merging each section's metadata (id and type)
   // with the corresponding content from sectionsData.
@@ -19,7 +24,8 @@ export const constructResumePayload = (sectionsData) => {
   const headerSection = dataArray.find((s) => s.type === "header");
   if (headerSection && headerSection.content) {
     const content = headerSection.content;
-    const names = content.name.split(" ");
+    // Use a default empty string for name if null to safely split.
+    const names = (content.name || "").split(" ");
     resume.firstName = names[0] || "";
     resume.lastName = names.slice(1).join(" ") || "";
     resume.email = content.email || "";
@@ -44,8 +50,8 @@ export const constructResumePayload = (sectionsData) => {
     educationSection.content.education
   ) {
     resume.education = educationSection.content.education.map((edu) => ({
-      institution: edu.school,
-      degree: edu.degree,
+      institution: edu.school || "",
+      degree: edu.degree || "",
       graduationDate:
         !edu.isCurrent && edu.endMonth && edu.endYear
           ? `${edu.endMonth} ${edu.endYear}`
@@ -67,8 +73,8 @@ export const constructResumePayload = (sectionsData) => {
     experienceSection.content.experience
   ) {
     resume.experience = experienceSection.content.experience.map((exp) => ({
-      company: exp.company,
-      position: exp.role,
+      company: exp.company || "",
+      position: exp.role || "",
       startDate:
         exp.startMonth && exp.startYear
           ? `${exp.startMonth} ${exp.startYear}`
@@ -106,7 +112,7 @@ export const constructResumePayload = (sectionsData) => {
     projectsSection.content.projects
   ) {
     resume.projects = projectsSection.content.projects.map((proj) => ({
-      title: proj.title,
+      title: proj.title || "",
       subtitle: "",
       dateRange: "",
       tools: [],
@@ -128,7 +134,7 @@ export const constructResumePayload = (sectionsData) => {
   ) {
     resume.awards = certificationsSection.content.certifications.map(
       (cert) => ({
-        title: cert,
+        title: cert || "",
         organization: "",
         date: "",
       })
