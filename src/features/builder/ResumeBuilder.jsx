@@ -15,12 +15,13 @@ import {
   FiMenu,
   FiX,
 } from "react-icons/fi";
-import { MdFlashOn, MdSettings } from "react-icons/md";
+import { MdFlashOn, MdSettings, MdHome } from "react-icons/md"; // Added MdHome for homepage icon
 import { ResumeContext } from "../../shared/context/resume-context";
 import ResumeGenerator from "./components/ResumeGenerator";
 import Loader from "../../shared/components/Loader";
 import axios from "axios";
 import { constructResumePayload } from "../../shared/utils/resumeUtils";
+import FeatureNavbar from "../../shared/components/FeatureNavbar";
 
 const useResumeGeneration = () => {
   const { sectionsData } = useContext(ResumeContext);
@@ -214,184 +215,187 @@ const ResumeBuilder = () => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden relative">
-      <div className="md:hidden fixed top-4 left-4 z-50">
-        <button
-          onClick={() => setShowLeftPanel(true)}
-          className="p-2 bg-white rounded-lg shadow-md focus:outline-none active:scale-95 transition-transform border border-gray-200"
-        >
-          <FiMenu className="w-5 h-5 text-gray-700" />
-        </button>
-      </div>
-      <div className="md:hidden fixed top-4 right-4 z-50">
-        <button
-          onClick={() => setShowRightPanel(true)}
-          className="p-2 bg-white rounded-lg shadow-md focus:outline-none active:scale-95 transition-transform border border-gray-200"
-        >
-          <MdSettings className="w-5 h-5 text-gray-700" />
-        </button>
-      </div>
-
-      <div className="hidden md:flex flex-col w-64 border-r border-gray-200 p-4">
-        <div className="mb-4 flex-1 overflow-y-auto">
-          <ElementsPanel
-            sectionTypes={sectionTypes}
-            addSection={handleAddSectionUnique}
-          />
+    <>
+      <FeatureNavbar />
+      <div className="flex h-screen overflow-hidden relative">
+        <div className="md:hidden fixed top-4 left-4 z-50">
+          <button
+            onClick={() => setShowLeftPanel(true)}
+            className="p-2 bg-white rounded-lg shadow-md focus:outline-none active:scale-95 transition-transform border border-gray-200"
+          >
+            <FiMenu className="w-5 h-5 text-gray-700" />
+          </button>
         </div>
-        <div className="flex-1 overflow-y-auto">
-          <LayersPanel
-            sections={sections}
-            moveSection={moveSection}
-            removeSection={removeSection}
-          />
+        <div className="md:hidden fixed top-4 right-4 z-50">
+          <button
+            onClick={() => setShowRightPanel(true)}
+            className="p-2 bg-white rounded-lg shadow-md focus:outline-none active:scale-95 transition-transform border border-gray-200"
+          >
+            <MdSettings className="w-5 h-5 text-gray-700" />
+          </button>
         </div>
-      </div>
 
-      {showLeftPanel && (
-        <div className="md:hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40">
-          <div className="absolute left-0 top-0 bottom-0 w-64 bg-white p-4 flex flex-col">
-            <div className="flex justify-between items-center mb-4 pb-2 border-b">
-              <h3 className="text-lg font-semibold text-gray-800">
-                Elements & Layers
-              </h3>
-              <button
-                onClick={() => setShowLeftPanel(false)}
-                className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <FiX className="w-6 h-6 text-gray-600" />
-              </button>
-            </div>
-            <div className="flex-1 flex flex-col gap-4 overflow-hidden">
-              <div className="flex-1 overflow-y-auto">
-                <ElementsPanel
-                  sectionTypes={sectionTypes}
-                  addSection={handleAddSectionUnique}
-                  mobile
-                />
+        <div className="hidden md:flex flex-col w-64 border-r border-gray-200 p-4">
+          <div className="mb-4 flex-1 overflow-y-auto">
+            <ElementsPanel
+              sectionTypes={sectionTypes}
+              addSection={handleAddSectionUnique}
+            />
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            <LayersPanel
+              sections={sections}
+              moveSection={moveSection}
+              removeSection={removeSection}
+            />
+          </div>
+        </div>
+
+        {showLeftPanel && (
+          <div className="md:hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40">
+            <div className="absolute left-0 top-0 bottom-0 w-64 bg-white p-4 flex flex-col">
+              <div className="flex justify-between items-center mb-4 pb-2 border-b">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Elements & Layers
+                </h3>
+                <button
+                  onClick={() => setShowLeftPanel(false)}
+                  className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <FiX className="w-6 h-6 text-gray-600" />
+                </button>
               </div>
-              <div className="border-t pt-4 flex-1 overflow-y-auto">
-                <LayersPanel
-                  sections={sections}
-                  moveSection={moveSection}
-                  removeSection={removeSection}
-                  mobile
-                />
+              <div className="flex-1 flex flex-col gap-4 overflow-hidden">
+                <div className="flex-1 overflow-y-auto">
+                  <ElementsPanel
+                    sectionTypes={sectionTypes}
+                    addSection={handleAddSectionUnique}
+                    mobile
+                  />
+                </div>
+                <div className="border-t pt-4 flex-1 overflow-y-auto">
+                  <LayersPanel
+                    sections={sections}
+                    moveSection={moveSection}
+                    removeSection={removeSection}
+                    mobile
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div
-        className="flex-1 p-4 relative overflow-hidden w-full md:max-w-4xl mx-auto mt-12 md:mt-0"
-        ref={resumeRef}
-        onDrop={handleDrop}
-        onDragOver={(e) => e.preventDefault()}
-      >
-        <div className="flex justify-between items-center mb-4 space-x-4">
-          <h2 className="text-xl font-bold text-gray-800">
-            {finalMode ? "Preview" : "Builder"}
-          </h2>
-          <div className="flex space-x-2">
-            <button
-              onClick={handleGenerate}
-              disabled={isLoading}
-              className="relative inline-flex items-center justify-center rounded-lg border border-blue-500 bg-transparent px-4 py-2 text-sm font-medium text-blue-600 shadow-sm transition-all duration-300 hover:bg-blue-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-100"
-            >
-              {isLoading ? (
-                <Loader size="sm" className="mr-2" />
-              ) : (
+        <div
+          className="flex-1 p-4 relative overflow-hidden w-full md:max-w-4xl mx-auto mt-12 md:mt-0"
+          ref={resumeRef}
+          onDrop={handleDrop}
+          onDragOver={(e) => e.preventDefault()}
+        >
+          <div className="flex justify-between items-center mb-4 space-x-4">
+            <h2 className="text-xl font-bold text-gray-800">
+              {finalMode ? "Preview" : "Builder"}
+            </h2>
+            <div className="flex space-x-2">
+              <button
+                onClick={handleGenerate}
+                disabled={isLoading}
+                className="relative inline-flex items-center justify-center rounded-lg border border-blue-500 bg-transparent px-4 py-2 text-sm font-medium text-blue-600 shadow-sm transition-all duration-300 hover:bg-blue-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-100"
+              >
+                {isLoading ? (
+                  <Loader size="sm" className="mr-2" />
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <MdFlashOn className="w-4 h-4" />
+                    <span>Generate</span>
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={handleEdit}
+                className="relative inline-flex items-center justify-center rounded-lg border border-green-500 bg-transparent px-4 py-2 text-sm font-medium text-green-600 shadow-sm transition-all duration-300 hover:bg-green-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-100"
+              >
                 <span className="flex items-center gap-2">
                   <MdFlashOn className="w-4 h-4" />
-                  <span>Generate</span>
+                  <span>{finalMode ? "Edit Mode" : "Preview"}</span>
                 </span>
-              )}
-            </button>
-
-            <button
-              onClick={handleEdit}
-              className="relative inline-flex items-center justify-center rounded-lg border border-green-500 bg-transparent px-4 py-2 text-sm font-medium text-green-600 shadow-sm transition-all duration-300 hover:bg-green-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-100"
-            >
-              <span className="flex items-center gap-2">
-                <MdFlashOn className="w-4 h-4" />
-                <span>{finalMode ? "Edit Mode" : "Preview"}</span>
-              </span>
-            </button>
+              </button>
+            </div>
           </div>
+          {finalMode ? (
+            <ResumeGenerator
+              pdfDataUrl={pdfDataUrl}
+              htmlData={htmlData}
+              isLoading={isLoading}
+              error={error}
+              setPdfDataUrl={setPdfDataUrl}
+              setHtmlData={setHtmlData}
+              disableDownload={false}
+            />
+          ) : (
+            <PreviewPanel
+              resumeRef={resumeRef}
+              sections={sections}
+              removeSection={removeSection}
+              contextMenu={contextMenu}
+              setContextMenu={setContextMenu}
+              handleRightClick={handleRightClick}
+              handleDrop={handleDrop}
+              currentTemplate="default"
+              customizations={customizations}
+              finalMode={finalMode}
+              mobile={!finalMode}
+            />
+          )}
         </div>
-        {finalMode ? (
-          <ResumeGenerator
-            pdfDataUrl={pdfDataUrl}
-            htmlData={htmlData}
-            isLoading={isLoading}
-            error={error}
-            setPdfDataUrl={setPdfDataUrl}
-            setHtmlData={setHtmlData}
-            disableDownload={false}
-          />
-        ) : (
-          <PreviewPanel
-            resumeRef={resumeRef}
-            sections={sections}
-            removeSection={removeSection}
-            contextMenu={contextMenu}
-            setContextMenu={setContextMenu}
-            handleRightClick={handleRightClick}
-            handleDrop={handleDrop}
-            currentTemplate="default"
+
+        <div className="hidden md:block w-64 border-l border-gray-200 p-4 overflow-y-auto">
+          <RightPanel
             customizations={customizations}
-            finalMode={finalMode}
-            mobile={!finalMode}
+            applyTemplate={handleApplyTemplate}
           />
+        </div>
+
+        {showRightPanel && (
+          <div className="md:hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40">
+            <div className="absolute right-0 top-0 bottom-0 w-64 bg-white p-4 flex flex-col">
+              <div className="flex justify-between items-center mb-4 pb-2 border-b">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Customization
+                </h3>
+                <button
+                  onClick={() => setShowRightPanel(false)}
+                  className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <FiX className="w-6 h-6 text-gray-600" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto">
+                <RightPanel
+                  customizations={customizations}
+                  applyTemplate={(templateId) => {
+                    handleApplyTemplate(templateId);
+                    setShowRightPanel(false);
+                  }}
+                  mobile
+                />
+              </div>
+
+              <div className="pt-4 border-t">
+                <button
+                  onClick={() => setShowRightPanel(false)}
+                  className="w-full py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+                >
+                  Close Settings
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
-
-      <div className="hidden md:block w-64 border-l border-gray-200 p-4 overflow-y-auto">
-        <RightPanel
-          customizations={customizations}
-          applyTemplate={handleApplyTemplate}
-        />
-      </div>
-
-      {showRightPanel && (
-        <div className="md:hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40">
-          <div className="absolute right-0 top-0 bottom-0 w-64 bg-white p-4 flex flex-col">
-            <div className="flex justify-between items-center mb-4 pb-2 border-b">
-              <h3 className="text-lg font-semibold text-gray-800">
-                Customization
-              </h3>
-              <button
-                onClick={() => setShowRightPanel(false)}
-                className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <FiX className="w-6 h-6 text-gray-600" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto">
-              <RightPanel
-                customizations={customizations}
-                applyTemplate={(templateId) => {
-                  handleApplyTemplate(templateId);
-                  setShowRightPanel(false);
-                }}
-                mobile
-              />
-            </div>
-
-            <div className="pt-4 border-t">
-              <button
-                onClick={() => setShowRightPanel(false)}
-                className="w-full py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
-              >
-                Close Settings
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 
