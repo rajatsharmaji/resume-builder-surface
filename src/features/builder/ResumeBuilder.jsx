@@ -15,7 +15,7 @@ import {
   FiMenu,
   FiX,
 } from "react-icons/fi";
-import { MdFlashOn, MdSettings, MdHome } from "react-icons/md"; // Added MdHome for homepage icon
+import { MdFlashOn, MdSettings } from "react-icons/md"; // Added MdHome for homepage icon
 import { ResumeContext } from "../../shared/context/resume-context";
 import ResumeGenerator from "./components/ResumeGenerator";
 import Loader from "../../shared/components/Loader";
